@@ -45,7 +45,7 @@ npm run build:domain
 npm run build:next
 ```
 
-The CI workflow installs the lockfile, rejects known high-severity production vulnerabilities, scans tracked files and Git history for common credential formats, and runs the build gate.
+The CI workflow installs the lockfile, rejects known high-severity dependency vulnerabilities, scans tracked files and Git history for common credential formats, and runs the build gate.
 
 ## Documentation
 

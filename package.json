@@ -50,12 +50,15 @@
     "fast-check": "4.9.0",
     "jsdom": "^30.0.1",
     "typescript": "7.0.2",
-    "vinext": "1.0.0-beta.2",
+    "vinext": "1.0.0-beta.8",
     "vite": "8.2.2",
     "vitest": "4.1.11",
     "wrangler": "4.124.0"
   },
   "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.12"
+    },
     "nanoid": "3.3.18",
     "next": {
       "postcss": "8.5.25",

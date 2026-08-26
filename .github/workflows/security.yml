@@ -38,8 +38,8 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Reject known high-severity production vulnerabilities
-        run: npm run audit:prod
+      - name: Reject known high-severity dependency vulnerabilities
+        run: npm audit --audit-level=high
 
       - name: Scan tracked files and history for common credential formats
         shell: bash
