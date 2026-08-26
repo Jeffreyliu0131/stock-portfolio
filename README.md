@@ -4,6 +4,12 @@ An iPhone-first portfolio PWA that unifies positions into one current view, pres
 
 The project is designed as a product and data-safety exercise rather than a trading terminal. It records and values a portfolio; it does not place orders, recommend trades, or promise real-time prices.
 
+## Ownership and evidence boundary
+
+This is an independent product and engineering project. I owned the product scope, PRD and ADR set, architecture, implementation, release gates, production deployment, incident diagnosis, and security hardening. AI coding agents supported implementation and review under my direction; I reviewed changes and verified releases through automated tests and reference builds.
+
+The current public snapshot passes 585 automated tests and uses synthetic data only. It demonstrates a shipped system and decision discipline; it does not claim external user adoption, investment performance, or business outcomes.
+
 ## What this project demonstrates
 
 - one canonical portfolio model across multiple input sources;
