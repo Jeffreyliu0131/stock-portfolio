@@ -983,7 +983,9 @@ describe("PortfolioDashboard", () => {
     const analysisTrigger = screen.getByRole("button", {
       name: "组合分析",
     });
-    const chatTrigger = screen.getByRole("button", { name: "AI 对话" });
+    const chatTrigger = screen.getByRole("button", {
+      name: "巴菲特框架顾问",
+    });
     const consultationEntry = screen.getByRole("region", {
       name: "组合工具",
     });
@@ -998,7 +1000,7 @@ describe("PortfolioDashboard", () => {
     ).toHaveAttribute("href", "/data-safety");
     expect(
       within(more).queryByRole("button", {
-        name: /组合结构与今日贡献|组合分析|AI 对话/,
+        name: /组合结构与今日贡献|组合分析|巴菲特框架顾问/,
       }),
     ).not.toBeInTheDocument();
     fireEvent.click(
@@ -1025,9 +1027,13 @@ describe("PortfolioDashboard", () => {
     });
 
     fireEvent.click(chatTrigger);
-    expect(screen.getByRole("dialog", { name: "AI 对话" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("dialog", { name: "巴菲特框架顾问" }),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "组合分析" })).not.toBeInTheDocument();
-    expect(screen.getByPlaceholderText("输入问题")).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("直接问：这个判断的证据够吗？"),
+    ).toBeInTheDocument();
     fireEvent.keyDown(document, { key: "Escape" });
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();

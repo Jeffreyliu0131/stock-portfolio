@@ -8,7 +8,8 @@ import "./obsidian-aurora.css";
 import { PWA_ICONS } from "./pwa-branding";
 import { SITES_APP_ORIGIN } from "../application/http/provider-proxy-contract";
 
-const SITE_DESCRIPTION = "登录后跨设备查看个人美股持仓与延迟行情估值。";
+const SITE_DESCRIPTION =
+  "跨设备查看个人美股持仓与延迟估值，并直接向证据约束的价值投资框架顾问提问。";
 const SOCIAL_IMAGE = new URL("/og.png", SITES_APP_ORIGIN).href;
 
 export const metadata: Metadata = {

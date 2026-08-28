@@ -1,8 +1,12 @@
 import { Decimal, rfc3339ToEpochNanoseconds } from "../../domain/index.ts";
+import {
+  VALUE_INVESTING_FRAMEWORK_LENSES,
+  type ValueInvestingFrameworkLens,
+} from "./value-investing-framework.ts";
 
-export const PORTFOLIO_CONSULTATION_SCHEMA_VERSION = 3 as const;
+export const PORTFOLIO_CONSULTATION_SCHEMA_VERSION = 4 as const;
 export const PORTFOLIO_CONSULTATION_PROMPT_VERSION =
-  "portfolio-consultation-v3" as const;
+  "portfolio-value-advisor-v4" as const;
 export const MAX_PORTFOLIO_CONSULTATION_POSITIONS = 100;
 export const MAX_PORTFOLIO_CONSULTATION_HISTORY_MESSAGES = 12;
 export const MAX_PORTFOLIO_CONSULTATION_QUESTION_CHARS = 1_200;
@@ -243,6 +247,7 @@ export interface PortfolioConsultationBrief {
 export interface PortfolioConsultationAnswer {
   readonly text: string;
   readonly evidenceRefs: readonly string[];
+  readonly frameworkLenses: readonly ValueInvestingFrameworkLens[];
   readonly suggestedQuestions: readonly string[];
 }
 
@@ -391,7 +396,12 @@ const CLASSIFICATION_KEYS = [
 ] as const;
 const BRIEF_KEYS = ["headline", "summary", "dimensions", "questions"] as const;
 const DIMENSION_KEYS = ["kind", "title", "text", "evidenceRefs"] as const;
-const ANSWER_KEYS = ["text", "evidenceRefs", "suggestedQuestions"] as const;
+const ANSWER_KEYS = [
+  "text",
+  "evidenceRefs",
+  "frameworkLenses",
+  "suggestedQuestions",
+] as const;
 const SUCCESS_KEYS = [
   "kind",
   "schemaVersion",
@@ -414,7 +424,7 @@ const SAFE_EVIDENCE_REF_PATTERN =
 const FORBIDDEN_GENERATED_NUMBER_PATTERN =
   /[0-9０-９%％$¥￥€£]|(?:百分之|千分之|万分之)[零〇一二两三四五六七八九十百千万亿]+|(?:第|前)[零〇一二两三四五六七八九十百千万亿]+/u;
 const FORBIDDEN_GENERATED_CLAIM_PATTERN =
-  /(买入|卖出|增持|减持|加仓|减仓|清仓|建仓|换仓|调仓|抄底|止盈|止损|做多|做空|提高仓位|降低仓位|增加仓位|减少仓位|目标价|保证收益|必涨|必跌|推荐股票|行情预测|预测涨跌|预计上涨|预计下跌|新闻显示|财报显示|实时消息|实时数据|最新消息)/u;
+  /(买入|卖出|增持|减持|加仓|减仓|清仓|建仓|换仓|调仓|抄底|止盈|止损|做多|做空|提高仓位|降低仓位|增加仓位|减少仓位|目标价|保证收益|必涨|必跌|推荐股票|行情预测|预测涨跌|预计上涨|预计下跌|新闻显示|财报显示|实时消息|实时数据|最新消息|我是巴菲特|作为巴菲特|代表巴菲特|巴菲特本人|巴菲特会说|巴菲特会做|巴菲特认为|伯克希尔官方|伯克希尔认为|I am Warren Buffett|As Warren Buffett|Warren Buffett would|Berkshire Hathaway official)/iu;
 const URL_PATTERN = /(?:https?:\/\/|www\.)/iu;
 
 const INSTRUMENT_TYPES = new Set<PortfolioConsultationInstrumentType>(
@@ -426,6 +436,16 @@ const SECTORS = new Set<PortfolioConsultationSector>(
 const DIMENSION_KINDS = new Set<PortfolioConsultationDimensionKind>(
   PORTFOLIO_CONSULTATION_DIMENSION_KINDS,
 );
+const FRAMEWORK_LENSES = new Set<ValueInvestingFrameworkLens>(
+  VALUE_INVESTING_FRAMEWORK_LENSES,
+);
+const FUNDAMENTAL_LENSES_REQUIRING_EVIDENCE_GAP = new Set<ValueInvestingFrameworkLens>([
+  "DURABLE_BUSINESS",
+  "MANAGEMENT_CAPITAL_ALLOCATION",
+  "OWNER_EARNINGS",
+  "FINANCIAL_STRENGTH",
+  "INTRINSIC_VALUE_MARGIN_OF_SAFETY",
+]);
 
 function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -1246,10 +1266,26 @@ function parseAnswer(
   minimumSuggestedQuestions = 1,
   maximumSuggestedQuestions = 2,
 ): PortfolioConsultationAnswer | null {
+  const candidate = isRecord(value) ? value : null;
+  const frameworkLenses =
+    candidate !== null && Array.isArray(candidate.frameworkLenses)
+      ? candidate.frameworkLenses
+      : [];
   if (
     !isRecord(value) ||
     !hasExactKeys(value, ANSWER_KEYS) ||
     !safeGeneratedText(value.text, 8, 900) ||
+    frameworkLenses.length < 1 ||
+    frameworkLenses.length > 3 ||
+    frameworkLenses.some(
+      (lens) => !FRAMEWORK_LENSES.has(lens as ValueInvestingFrameworkLens),
+    ) ||
+    new Set(frameworkLenses).size !== frameworkLenses.length ||
+    (frameworkLenses.some((lens) =>
+      FUNDAMENTAL_LENSES_REQUIRING_EVIDENCE_GAP.has(
+        lens as ValueInvestingFrameworkLens,
+      ),
+    ) && !frameworkLenses.includes("EVIDENCE_GAP")) ||
     !Array.isArray(value.suggestedQuestions) ||
     value.suggestedQuestions.length < minimumSuggestedQuestions ||
     value.suggestedQuestions.length > maximumSuggestedQuestions ||
@@ -1267,6 +1303,7 @@ function parseAnswer(
   return {
     text: value.text,
     evidenceRefs,
+    frameworkLenses: frameworkLenses as readonly ValueInvestingFrameworkLens[],
     suggestedQuestions: value.suggestedQuestions as readonly string[],
   };
 }

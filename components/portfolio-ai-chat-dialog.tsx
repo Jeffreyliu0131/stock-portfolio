@@ -16,6 +16,12 @@ import {
   type PortfolioConsultationRequest,
 } from "../application/ai/portfolio-consultation-api.ts";
 import {
+  VALUE_INVESTING_ADVISOR_DISCLOSURE,
+  VALUE_INVESTING_ADVISOR_NAME,
+  VALUE_INVESTING_FRAMEWORK_LENS_LABELS,
+  type ValueInvestingFrameworkLens,
+} from "../application/ai/value-investing-framework.ts";
+import {
   PortfolioConsultationClientError,
   requestPortfolioConsultation,
 } from "../application/ai/browser/portfolio-consultation-client.ts";
@@ -40,6 +46,7 @@ interface PortfolioAiChatDialogProps {
 interface PortfolioChatMessage extends PortfolioConsultationHistoryMessage {
   readonly id: number;
   readonly evidenceRefs: readonly string[];
+  readonly frameworkLenses: readonly ValueInvestingFrameworkLens[];
 }
 
 const MAX_VISIBLE_CHAT_MESSAGES = 24;
@@ -282,12 +289,14 @@ export function PortfolioAiChatDialog({
               role: "user" as const,
               content: trimmedQuestion,
               evidenceRefs: [],
+              frameworkLenses: [],
             },
             {
               id: assistantId,
               role: "assistant" as const,
               content: answer.text,
               evidenceRefs: answer.evidenceRefs,
+              frameworkLenses: answer.frameworkLenses,
             },
           ].slice(-MAX_VISIBLE_CHAT_MESSAGES),
         );
@@ -337,7 +346,12 @@ export function PortfolioAiChatDialog({
         aria-labelledby="portfolio-ai-chat-dialog-title"
       >
         <header className="portfolio-ai-chat-dialog__header">
-          <h2 id="portfolio-ai-chat-dialog-title">AI 对话</h2>
+          <div>
+            <h2 id="portfolio-ai-chat-dialog-title">
+              {VALUE_INVESTING_ADVISOR_NAME}
+            </h2>
+            <p>方法论模拟 · 非本人或官方服务</p>
+          </div>
           <button type="button" onClick={onClose}>
             完成
           </button>
@@ -348,12 +362,37 @@ export function PortfolioAiChatDialog({
           ref={messageList}
           aria-live="polite"
         >
+          {messages.length === 0 && pendingQuestion === null ? (
+            <section className="portfolio-ai-chat-dialog__intro">
+              <strong>直接问一个投资问题</strong>
+              <p>
+                我会用能力圈、生意质量、所有者收益、安全边际和机会成本等视角追问你的判断；没有一手证据时会明确停在证据不足。
+              </p>
+              <p className="portfolio-ai-chat-dialog__privacy">
+                发送后，当前持仓代码、数量、成本、估值、盈亏与现金会经服务端交给模型；不发送姓名、邮箱、券商账号、设备标识、历史库或备份。关闭后对话清除。
+              </p>
+              <span>{VALUE_INVESTING_ADVISOR_DISCLOSURE}</span>
+            </section>
+          ) : null}
           {messages.map((message) => (
             <article
               className={`portfolio-ai-chat-dialog__message portfolio-ai-chat-dialog__message--${message.role}`}
               key={message.id}
             >
               <p>{message.content}</p>
+              {message.role === "assistant" &&
+              message.frameworkLenses.length > 0 ? (
+                <div
+                  className="portfolio-ai-chat-dialog__lenses"
+                  aria-label="本轮采用的价值投资视角"
+                >
+                  {message.frameworkLenses.map((lens) => (
+                    <span key={lens}>
+                      {VALUE_INVESTING_FRAMEWORK_LENS_LABELS[lens]}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
               {message.role === "assistant" && message.evidenceRefs.length > 0 ? (
                 <div className="portfolio-ai-evidence-list">
                   {message.evidenceRefs.flatMap((ref) => {
@@ -402,7 +441,7 @@ export function PortfolioAiChatDialog({
               maxLength={MAX_PORTFOLIO_CONSULTATION_QUESTION_CHARS}
               rows={2}
               disabled={isSending}
-              placeholder="输入问题"
+              placeholder="直接问：这个判断的证据够吗？"
               onChange={(event) => setQuestion(event.target.value)}
               onKeyDown={onQuestionKeyDown}
             />

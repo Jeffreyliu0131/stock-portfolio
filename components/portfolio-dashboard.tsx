@@ -1044,7 +1044,7 @@ export function PortfolioDashboard({
             type="button"
             onClick={() => setAiChatOpen(true)}
           >
-            AI 对话
+            巴菲特框架顾问
           </button>
         </section>
       ) : null}

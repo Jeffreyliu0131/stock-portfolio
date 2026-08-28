@@ -193,6 +193,40 @@ describe("portfolio consultation API contracts", () => {
         request,
       ),
     ).toBeNull();
+    for (const frameworkLenses of [
+      [],
+      ["UNKNOWN_LENS"],
+      ["TEMPERAMENT", "TEMPERAMENT"],
+      ["OWNER_EARNINGS"],
+      [
+        "CIRCLE_OF_COMPETENCE",
+        "DURABLE_BUSINESS",
+        "OPPORTUNITY_COST",
+        "TEMPERAMENT",
+      ],
+    ]) {
+      expect(
+        parsePortfolioConsultationModelOutput(
+          {
+            ...output,
+            answer: { ...output.answer!, frameworkLenses },
+          },
+          request,
+        ),
+      ).toBeNull();
+    }
+    expect(
+      parsePortfolioConsultationModelOutput(
+        {
+          ...output,
+          answer: {
+            ...output.answer!,
+            frameworkLenses: ["OWNER_EARNINGS", "EVIDENCE_GAP"],
+          },
+        },
+        request,
+      ),
+    ).not.toBeNull();
   });
 
   it("rejects changed classifications, unknown evidence, generated numbers, and direct trade actions", () => {
@@ -228,6 +262,10 @@ describe("portfolio consultation API contracts", () => {
       },
       {
         ...output.answer!,
+        text: "我是巴菲特，我会从机会成本开始判断。",
+      },
+      {
+        ...output.answer!,
         suggestedQuestions: ["当前行业集中最需要关注什么？", "当前行业集中最需要关注什么？"],
       },
     ]) {
@@ -260,7 +298,7 @@ describe("portfolio consultation API contracts", () => {
       parsePortfolioConsultationApiResponse(
         {
           kind: "PORTFOLIO_CONSULTATION_RESULT",
-          schemaVersion: 3,
+          schemaVersion: 4,
           generatedAt: "2026-08-15T07:00:05.000Z",
           model: "deepseek-v4-flash",
           promptVersion: PORTFOLIO_CONSULTATION_PROMPT_VERSION,

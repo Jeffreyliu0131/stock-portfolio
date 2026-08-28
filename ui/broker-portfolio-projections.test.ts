@@ -89,7 +89,7 @@ describe("broker portfolio projections", () => {
       question: "现金结构是什么？",
     });
     expect(request).toMatchObject({
-      schemaVersion: 3,
+      schemaVersion: 4,
       portfolio: {
         summary: { cashBalanceUsd: "1350" },
         cash: {

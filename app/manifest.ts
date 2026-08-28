@@ -7,7 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     name: "总仓位",
     short_name: "总仓位",
-    description: "合并查看个人美股持仓与延迟行情估值。",
+    description:
+      "合并查看个人美股持仓与延迟估值，并直接向价值投资框架顾问提问。",
     start_url: "/",
     scope: "/",
     display: "standalone",

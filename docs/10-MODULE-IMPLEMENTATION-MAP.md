@@ -186,13 +186,13 @@ flowchart LR
 - **证据：** `ui/portfolio-insights.test.ts`、`components/portfolio-insights-sheet.test.tsx`、`components/portfolio-dashboard.test.tsx`。
 - **真源：** `02-DOMAIN-AND-CALCULATIONS.md` 第 6.2 节、ADR-032、PRD FR-13。
 
-### 3.10A DeepSeek 组合分析与独立 AI 对话
+### 3.10A DeepSeek 组合分析与巴菲特框架顾问
 
-- **代码：** `application/ai/portfolio-consultation-api.ts`、`application/ai/browser/portfolio-consultation-client.ts`、`application/ai/server/deepseek-portfolio-consultant.ts`、`application/ai/server/sliding-window-rate-limiter.ts`、`ui/portfolio-consultation-context.ts`、`app/api/ai/portfolio-analysis/route.ts`、`components/portfolio-ai-consultation-panel.tsx`、`components/portfolio-ai-chat-dialog.tsx`、`components/portfolio-insights-sheet.tsx`、`components/portfolio-dashboard.tsx`。
-- **职责：** 从当前 `PortfolioCopySource` 与 `PortfolioInsights` 生成 schema v3 current-only USD 完整快照并固定调用 `deepseek-v4-flash`。schema v3 包含统一组合现金与底层兼容分量；“组合分析”点按后发起 `INITIAL_ANALYSIS`，“AI 对话”打开零请求、发送时发起 `CHAT` 并固定首次发送快照。模型分类、六维体检、证据、本机 Decimal 数字重绘和不合规输出整份拒绝边界不变。
+- **代码：** `application/ai/value-investing-framework.ts`、`application/ai/portfolio-consultation-api.ts`、`application/ai/browser/portfolio-consultation-client.ts`、`application/ai/server/deepseek-portfolio-consultant.ts`、`application/ai/server/sliding-window-rate-limiter.ts`、`ui/portfolio-consultation-context.ts`、`app/api/ai/portfolio-analysis/route.ts`、`components/portfolio-ai-consultation-panel.tsx`、`components/portfolio-ai-chat-dialog.tsx`、`components/portfolio-insights-sheet.tsx`、`components/portfolio-dashboard.tsx`。
+- **职责：** 从当前 `PortfolioCopySource` 与 `PortfolioInsights` 生成 schema v4 current-only USD 完整快照并固定调用 `deepseek-v4-flash`。schema v4 保留统一组合现金与底层兼容分量；“组合分析”点按后发起 `INITIAL_ANALYSIS`，“巴菲特框架顾问”打开零请求、可直接输入，发送时发起 `CHAT` 并固定首次发送快照。模型不得冒充本人；每个回答必须携带一到三个可验 framework lenses，没有一手基本面时使用 `EVIDENCE_GAP`。模型分类、六维体检、证据、本机 Decimal 数字重绘和不合规输出整份拒绝边界不变。
 - **写入：** 无资产或浏览器持久化写入。分析结果与聊天会话分别只保留在各自 React dialog state；父页自动刷新不替换已开始的聊天快照，关闭或页面刷新即清除。重新打开组合分析会用当时最新快照自动开始，重新打开聊天为空且仍不请求。服务端只使用进程内哈希 caller 限流 bucket；`DEEPSEEK_API_KEY` 只存在服务端。
-- **证据：** `tests/portfolio-consultation-api.test.ts`、`ui/portfolio-consultation-context.test.ts`、`tests/deepseek-portfolio-consultant.test.ts`、`tests/portfolio-ai-route.test.ts`、`tests/portfolio-consultation-client.test.ts`、`tests/sliding-window-rate-limiter.test.ts`、`components/portfolio-ai-consultation-panel.test.tsx`、`components/portfolio-ai-chat-dialog.test.tsx`、`components/portfolio-insights-sheet.test.tsx`、`components/portfolio-dashboard.test.tsx`。
-- **真源：** ADR-042、ADR-041（经修订）、PRD FR-14、`04-TECHNICAL-SPEC.md` 第 6.6 节。ADR-039 对应的 v1 模块仍留在仓库，但当前 route 与 UI 不再导入。
+- **证据：** `tests/value-investing-framework.test.ts`、`tests/portfolio-consultation-api.test.ts`、`ui/portfolio-consultation-context.test.ts`、`tests/deepseek-portfolio-consultant.test.ts`、`tests/portfolio-ai-route.test.ts`、`tests/portfolio-consultation-client.test.ts`、`tests/sliding-window-rate-limiter.test.ts`、`components/portfolio-ai-consultation-panel.test.tsx`、`components/portfolio-ai-chat-dialog.test.tsx`、`components/portfolio-insights-sheet.test.tsx`、`components/portfolio-dashboard.test.tsx`。
+- **真源：** ADR-049、ADR-042（经修订）、ADR-041（经修订）、PRD FR-14、`04-TECHNICAL-SPEC.md` 第 6.6 节。ADR-039 对应的 v1 模块仍留在仓库，但当前 route 与 UI 不再导入。
 
 ### 3.11 低噪音持仓复制与双目标交付
 

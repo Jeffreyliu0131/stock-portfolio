@@ -32,7 +32,7 @@ export function portfolioConsultationClassifications(): readonly PortfolioConsul
 export function initialPortfolioConsultationRequest(): PortfolioConsultationRequest {
   return {
     kind: "PORTFOLIO_CONSULTATION",
-    schemaVersion: 3,
+    schemaVersion: 4,
     generatedAt: "2026-08-15T07:00:00.000Z",
     locale: "zh-CN",
     mode: "INITIAL_ANALYSIS",
@@ -230,6 +230,7 @@ export function followUpPortfolioConsultationOutput(): PortfolioConsultationMode
     answer: {
       text: "现金降低了组合对股票价格变化的即时敏感度，并保留了流动性选择空间。",
       evidenceRefs: ["portfolio.cash", "portfolio.structure"],
+      frameworkLenses: ["OPPORTUNITY_COST", "TEMPERAMENT"],
       suggestedQuestions: ["当前行业集中最需要关注什么？"],
     },
   };
@@ -259,6 +260,7 @@ export function chatPortfolioConsultationOutput(): PortfolioConsultationModelOut
     answer: {
       text: "现金缓和了股票价格变化对总资产的即时影响，也保留了流动性选择空间。",
       evidenceRefs: ["portfolio.cash", "portfolio.structure"],
+      frameworkLenses: ["OPPORTUNITY_COST", "TEMPERAMENT"],
       suggestedQuestions: [],
     },
   };

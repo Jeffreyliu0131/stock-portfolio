@@ -45,8 +45,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          npm run public:check
           pattern='BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{30,}|sk-[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{30,}|xox[baprs]-[A-Za-z0-9-]{20,}'
-          if git grep -IlE "$pattern" -- ':!package-lock.json' ':!docs/**'; then
+          if git grep -IlE "$pattern" -- ':!package-lock.json'; then
             echo "Potential credential format found in tracked files."
             exit 1
           fi
@@ -56,4 +57,4 @@ jobs:
           fi
 
       - name: Typecheck, test, domain build, and reference Next.js build
-        run: npm run verify && npm run build:next
+        run: npm run verify && npm run build:next && npm run bundle:check

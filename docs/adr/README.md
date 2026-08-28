@@ -1,6 +1,6 @@
 # 架构决策记录
 
-最后更新：2026-08-22（统一组合现金修订）
+最后更新：2026-08-28（价值投资框架顾问修订）
 
 ADR 状态：
 
@@ -52,13 +52,14 @@ ADR 状态：
 | [ADR-039](ADR-039-EVIDENCE-BOUND-DEEPSEEK-PORTFOLIO-INTERPRETATION.md) | 使用证据约束的 DeepSeek 解读当前组合 | Superseded by ADR-041 | 最小事实包和一次性输出已被取代；用户主动触发、服务端密钥、`no-store`、失败降级和不持久化原则继续有效 |
 | [ADR-040](ADR-040-REMOVE-PERSONAL-PRODUCTION-BOOTSTRAP.md) | 移除个人 Production 固定启动数据 | Accepted | 客户端不再包含固定资产载荷或自动恢复调用；新来源保持空组合，已有 IndexedDB current、历史数据和旧标记不改写 |
 | [ADR-041](ADR-041-FULL-CONTEXT-DEEPSEEK-PORTFOLIO-CONSULTATION.md) | 使用完整当前快照提供 DeepSeek 组合咨询与行业暴露分析 | Amended by ADR-042 and ADR-044 | 完整 current-only、安全输出与本机 Decimal 不变；现金 context 由 ADR-044 扩展为双券商 schema v3 |
-| [ADR-042](ADR-042-SEPARATE-PORTFOLIO-ANALYSIS-AND-AI-CHAT.md) | 组合分析与 AI 对话使用两个独立入口和会话 | Amended by ADR-044 | 两入口/触发/固定快照不变；请求现金 contract 升为双券商 schema/prompt v3 |
+| [ADR-042](ADR-042-SEPARATE-PORTFOLIO-ANALYSIS-AND-AI-CHAT.md) | 组合分析与 AI 对话使用两个独立入口和会话 | Amended by ADR-044 and ADR-049 | 两入口/触发/固定快照不变；对话升级为巴菲特框架顾问与 schema/prompt v4 |
 | [ADR-043](ADR-043-PUBLIC-DEPLOYMENT-SECURITY-HARDENING.md) | 公开部署采用分层安全加固 | Amended by ADR-045 and ADR-046 | 产品页面公开免登录被取代；请求/上游/日志、Vercel 供应链与 provider 硬预算继续适用于 provider-only 后端 |
 | [ADR-044](ADR-044-UNIFIED-VIEW-BROKER-AWARE-TRADE-BOOK.md) | 统一展示下使用双券商交易与现金账本 | Amended by ADR-045 and ADR-048 | 活动 v4 current 在账号 D1；股票来源仍分券商，用户可见现金改为统一组合池 |
 | [ADR-045](ADR-045-SITES-AUTHENTICATED-CLOUD-PORTFOLIO.md) | OpenAI Sites 登录与账号云端持仓真值 | Accepted | owner-only 登录；D1 按 Sites 用户 ID 隔离；同账号跨设备；旧 IndexedDB 只经 JSON 显式迁移 |
 | [ADR-046](ADR-046-SITES-VERCEL-PROVIDER-PROXY.md) | Sites 使用 Vercel 作为固定 provider 代理 | Amended by ADR-047 | Sites 保留 UI/登录/D1；五个 provider API 保持精确 CORS；Vercel 另提供公开只读 PWA 图标 |
 | [ADR-047](ADR-047-PUBLIC-PWA-INSTALL-ICONS.md) | 受保护 Sites 使用公开只读的 PWA 安装图标 | Accepted | Sites 继续 owner-only；版本化图标从固定 Vercel origin 匿名读取，普通功能更新仍自动生效 |
 | [ADR-048](ADR-048-UNIFIED-PORTFOLIO-CASH-POOL.md) | 所有股票买卖统一联动组合现金池 | Accepted | 无 BOXX/SGOV 特例；卖出净额进组合现金，买入总额从组合现金扣减；股票来源仍用于数量与成本 |
+| [ADR-049](ADR-049-BUFFETT-FRAMEWORK-ADVISOR.md) | 巴菲特公开原则驱动的价值投资顾问 | Accepted | 非冒充方法论模拟；回答必须返回可验 framework lenses，基本面不足时输出证据缺口，空态披露完整运行时数据边界 |
 
 ## 当前绑定基线
 
@@ -86,7 +87,7 @@ ADR 状态：
 22. 首页总资产使用 Robinhood-inspired 连续纯黑英雄层级；唯一“今日走势”使用 `feed=sip`、`15Min`、`split` 的当前持仓估算线，服务端只接收标的，数量、现金和组合计算留在本机。
 23. 首页不显示 `1W / 1M / 3M / 1Y / ALL`、历史菜单或导入入口；`/history` 重定向首页，Controller 不读取或写入历史库。既有本机历史数据保留，重新启用需新决定。
 24. Production 客户端不包含固定个人资产载荷或自动恢复调用；新账号保持空组合，只能手工录入或使用 ADR-031/044 的 JSON v2/v3 空账号恢复。旧 Vercel origin 的 current、历史数据和旧标记不改写，也不会被 Sites 自动读取。
-25. 首页提供“组合分析”和“AI 对话”两个独立入口与弹层。点按组合分析明确触发 current-only USD 六维体检和逐只行业/角色推断；打开 AI 对话零请求，首次发送才建立完整固定快照，后续只附最近六轮成功历史。运行界面不显示前置披露、示例、建议问题或重新体检。两条路径均不发送身份、账号、设备、存储内部、历史库或备份；本机使用 Decimal 真值渲染数字，不伪造高级风险、外部归因、目标价、预测或直接交易指令，会话不持久化且不修改资产。
+25. 首页提供“组合分析”和“巴菲特框架顾问”两个独立入口与弹层。点按组合分析明确触发 current-only USD 六维体检和逐只行业/角色推断；打开顾问零请求，可直接输入，首次发送才建立完整固定快照，后续只附最近六轮成功历史。顾问是非冒充的公开价值投资原则模拟；每个回答必须选择可验 framework lenses，基本面不足时明确输出证据缺口。空态披露会发送的当前组合字段和不发送的身份/存储字段；无同意页或额外步骤。本机使用 Decimal 真值渲染数字，不伪造高级风险、外部归因、目标价、预测或直接交易指令，会话不持久化且不修改资产。
 26. provider 服务继续使用严格 JSON/字段/实际字节、限流、固定上游、超时和响应上限；Vercel 只允许精确 Sites origin 的无 credentials CORS，Sites CSP 只增加固定 Vercel `connect-src`。provider 硬预算与无敏感日志原则继续有效。
 27. 来源持仓账本必须经过校准确认才启用；买卖、费用、来源股票、统一组合现金变化和事件在同一 v4 current 写入中生效。JSON v3 保留 current 与事件，恢复只允许账号全 current 为空。
 28. PWA 安装图标是公开只读静态资产：Sites 的 App identity、`start_url`、登录和 D1 不变；favicon、`apple-touch-icon` 与 manifest 图标从固定 Vercel `/icons/` 获取，CSP `img-src` 只增加该 origin，API CORS 不扩大。

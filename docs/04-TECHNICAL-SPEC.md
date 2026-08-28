@@ -35,7 +35,7 @@
 - `[用户确认 2026-07-30]` 首页需要把当前手机中已保存的持仓手动导出为 JSON；导出和后续修改不得弄丢现有数据。
 - `[用户确认 2026-08-09；2026-08-20 修订]` JSON v2/v3 只允许恢复到账号股票、现金与 v4 book 都为空的组合；先在当前设备严格校验并预览，不合并、不覆盖。二次确认后，repository 在同一次 D1 state compare-and-swap 中复查空目标并写入规范化 current，失败零变化。源 revision 不继承，恢复记录固定 `revision=1`、`nextRevision=2`、`previous=null`；原始文件、草稿、行情/汇率缓存、legacy 或同步状态不进入 D1。
 - `[用户确认 2026-08-09]` 组合结构使用已定价股票市值加现金本金作为分母；缺价明确部分口径。组合今日净额只在全量可计算时生成，绝对贡献按单股今日变化绝对值占可计算股票绝对变化总量计算，缺失不补 `0`。
-- `[用户确认 2026-08-13；2026-08-15、2026-08-20 修订]` 首页提供独立“组合分析”和“AI 对话”。两者共用严格 current-only schema v3；v3 只扩展现金为 `PORTFOLIO + IBKR/moomoo accounts + optional ibkrInterest`，其余安全输出、本机 Decimal 数字和无持久化边界不变。
+- `[用户确认 2026-08-13；2026-08-15、2026-08-20、2026-08-28 修订]` 首页提供独立“组合分析”和“巴菲特框架顾问”。两者共用严格 current-only schema v4；请求仍包含 `PORTFOLIO + IBKR/moomoo accounts + optional ibkrInterest`，CHAT/FOLLOW_UP 响应新增一到三个可验的价值投资 framework lenses。非冒充、证据缺口、安全输出、本机 Decimal 数字和无持久化是绑定边界。
 - `[用户确认 2026-08-01；2026-08-09、2026-08-12 修订]` 首页为前 5、前 10、全部或单只资料提供普通复制与 ChatGPT 两个目标。两者复用同一 USD 事实文本和范围 contract；普通复制只写剪贴板并留在 PWA，ChatGPT 路径复制后通过 `https://chatgpt.com/?prompt=` 预填待发送 Prompt。均不自动发送或调用 OpenAI API，失败时使用目标对应的手工回退。
 - `[用户确认 2026-08-03]` 复制资料面向 AI 建议使用组合摘要与紧凑持仓表；逐股行情排障元数据压缩为组合级行情口径、价格时间范围和上一有效价/隔夜指示价标记，不改变底层行情 contract。
 - `[用户确认 2026-08-02]` 首页提供 USD / 人民币显示模式；人民币金额从未舍入 USD 真值和一笔有效 USD/CNY 汇率派生，不建立第二套成本或汇兑盈亏。汇率优先使用 Alpaca `USDCNY` 中间价，失败时使用欧洲央行日参考交叉汇率；双源与缓存均不可用时继续显示 USD。
@@ -81,7 +81,7 @@ v4 手工 BUY/SELL 已由 ADR-044 进入 current 维护；ADR-045 把 current �
 | 本机历史与长期收益 | 已停用并退出产品运行路径 | 独立历史 IndexedDB、解析和 Modified Dietz 代码为避免破坏既有本机数据而保留；首页无周期控件或入口，`/history` 重定向首页，控制器不查询或写入历史库 |
 | 固定个人 Production 启动数据 | 已移除 | 新 Sites 账号保持空组合，不自动读取旧 Vercel origin；旧本机数据只经 JSON 明确迁移 |
 | 组合结构与今日绝对贡献 | 已进入 Sites Production，真机未验收 | `ui/portfolio-insights.ts` 复用组合输入派生同分母结构、Top N、统一组合现金、完整/部分净额和绝对贡献；确定性模块不写存储、不依赖 AI 或请求新行情 |
-| DeepSeek 组合分析与 AI 对话 | schema/prompt v3 provider Production 已验证，真机待验收 | 两个入口和 dialog 共用 schema v3；固定 Vercel provider 的合成 INITIAL_ANALYSIS 已返回 `deepseek-v4-flash`、2 条分类、6 个维度与 `no-store` |
+| DeepSeek 组合分析与巴菲特框架顾问 | schema/prompt v4 已在本地实现，未发布 | 两个入口和 dialog 共用 schema v4；上一个 provider Production 证据仍是 schema v3，不能用来声称 v4 live quality |
 | 旧同步边界 | 有实现但未接 P0 运行链路 | `application/sync/` 有本地 store、transport contract 和内存替身；首页与表单不导入，没有真实云端，且旧 adapter 不得与 P0 repository 同时拥有同名数据库 |
 | 行情应用层 | 已实现并接页面 | 批量刷新、fixture provider、IndexedDB 上一有效价 store、单调缓存覆盖和前后台恢复刷新 |
 | Alpaca 行情 | 已实现并配置生产凭据 | 按市场时段使用 `delayed_sip` / `overnight`；生产标的解析和盘前 `delayed_sip` 有效价已验证，实际隔夜 `overnight` 待时间绑定 smoke |
@@ -263,10 +263,10 @@ flowchart LR
   B --> I
   B --> F["Web Share 文件 / Blob 下载\n不上传服务端"]
   V --> N["组合分析\nAI 体检 + 确定性结构与贡献"]
-  V --> CH["AI 对话\n打开零请求 / 发送才调用"]
+  V --> CH["巴菲特框架顾问\n打开零请求 / 发送才调用"]
   N --> AF["current-only USD 完整快照\nINITIAL_ANALYSIS"]
   CH --> AF
-  AF --> AR["Vercel /api/ai/portfolio-analysis\nschema v3 / no-store / 限流"]
+  AF --> AR["Vercel /api/ai/portfolio-analysis\nschema v4 / no-store / 限流"]
   AR --> DS["DeepSeek V4 Flash\n官方 HTTPS / Vercel-only key"]
   DS --> EV["AI 行业/角色分类 + 证据短文\n本机汇总暴露与重绘数字"]
   V --> C["结构化持仓资料\n当前内存真值"]
@@ -298,7 +298,7 @@ flowchart LR
 8. 在首页看到 2 × 2 核心指标和五列连续资产表；名称/代码固定，股票与现金按 UX 已确认字段在同一横向滚动区域展示；
 9. 从“数据安全与恢复”只读导出 current-only JSON v2/v3，优先使用 Web Share 文件，必要时回退为 Blob 下载；
 10. 在账号 positions/cash/broker 全空时严格预览并二次确认，把 JSON v2/v3 中的规范化 current 通过同一 D1 CAS 恢复；非空、无效、并发或写入失败均不合并、不覆盖且零写入；
-11. 从首页两个并列入口分别打开独立详情：点按“组合分析”立即用 current-only USD 完整快照生成行业/角色分类和六维体检，并继续显示确定性结构与贡献；打开“AI 对话”保持零请求，首次发送才固定快照，后续附最近六轮成功历史。两个 dialog 卸载后都清除内存结果，不写持久存储；
+11. 从首页两个并列入口分别打开独立详情：点按“组合分析”立即用 current-only USD 完整快照生成行业/角色分类和六维体检，并继续显示确定性结构与贡献；打开“巴菲特框架顾问”保持零请求且可直接输入，首次发送才固定快照，后续附最近六轮成功历史。每个回答显示一到三个 framework lenses；没有一手基本面时不伪造公司判断。两个 dialog 卸载后都清除内存结果，不写持久存储；
 12. 从“更多操作”或单只股票菜单先选普通复制或 ChatGPT 目标，再完成前 5、前 10、全部或单只选择；两者复用同一低噪音文本。普通目标写入剪贴板并留在 PWA，ChatGPT 目标写入剪贴板并通过 `https://chatgpt.com/?prompt=<编码后的同一文本>` 打开待发送输入框；失败时使用目标专属手工回退，不修改持仓或调用 OpenAI API；
 13. 在首页页面级看到一次约 15 分钟延迟披露；持仓行使用“名称/代码、市值/数量、估值价/均价、盈亏/收益率、今日涨幅”五列，不显示市场时段、行情日期时间、过期、上一有效价或隔夜提醒。缺价与请求故障仍明确呈现，首页不显示独立行情汇总卡；
 14. 在 USD 与人民币模式间切换整页金额；数量、收益率和复制资料保持 USD 真值语义，无汇率时继续显示 USD。
@@ -472,16 +472,17 @@ type PortfolioCopyTarget = "clipboard" | "chatgpt";
 
 展示层只把已派生的十进制比例在最终绘图边界转换为图表坐标：仓位环图单独显示前 5 大股票，第 6 名起聚合成“其他股票”，但逐股数据不聚合；今日条形图先用未舍入十进制金额除以最大绝对金额归一化到 `[-1, 1]`，数值标签仍使用原始十进制 USD 或同笔汇率派生的 CNY。图表不参与排序、分母、持久化或业务判断。
 
-### 6.6 DeepSeek 组合分析与独立 AI 对话
+### 6.6 DeepSeek 组合分析与巴菲特框架顾问
 
-- `ui/portfolio-consultation-context.ts` 从当前 `PortfolioCopySource` 和 `PortfolioInsights` 生成 schema v3。现金为总账面余额、两家券商 settled/pending 分项和可选 IBKR 利息；它不读取 book revision、event id、旧/历史库、草稿、备份或剪贴板。
-- `application/ai/portfolio-consultation-api.ts` 是浏览器、路由与 provider 共用的唯一运行 contract。schema v3 接受 `INITIAL_ANALYSIS`、兼容 `FOLLOW_UP` 与 `CHAT`；原模式、持仓、历史、证据和危险输出限制不变，并严格复核账户分项之和等于总现金。
+- `ui/portfolio-consultation-context.ts` 从当前 `PortfolioCopySource` 和 `PortfolioInsights` 生成 schema v4 request。现金为总账面余额、两家券商 settled/pending 分项和可选 IBKR 利息；它不读取 book revision、event id、旧/历史库、草稿、备份或剪贴板。
+- `application/ai/portfolio-consultation-api.ts` 是浏览器、路由与 provider 共用的唯一运行 contract。schema v4 接受 `INITIAL_ANALYSIS`、兼容 `FOLLOW_UP` 与 `CHAT`；CHAT/FOLLOW_UP answer 必须携带一到三个唯一且在白名单内的 `frameworkLenses`。原模式、持仓、历史、证据和危险输出限制不变，并严格复核账户分项之和等于总现金。
 - 初始响应必须按请求顺序对每只持仓返回一条 `AI_INFERRED` 分类：`instrumentType`、GICS 对齐 `sector`、`themes`、`confidence` 和 `rationale`。`ui/portfolio-consultation-context.ts` 再把已验证分类映射回当前未舍入 `assetWeight`，使用 Decimal 汇总行业与资产角色暴露；现金不分类，缺价不以成本或零补入。
-- 初始 `brief` 固定包含资产/现金配置、集中度、行业/主题、工具/潜在重叠、表现/贡献和数据边界六个不重复维度，`questions` 固定为空。独立 CHAT `answer` 可回答问题，但只能引用已知基础 evidence；模型正文不承载数字，组件根据引用使用会话开始时 USD/CNY 真值生成证据标签。
-- `components/portfolio-ai-consultation-panel.tsx` 只拥有一次组合体检 state，挂载即使用打开时 props 请求，渲染分类、暴露和六维 brief；后台 props 刷新不替换该结果，失败只保留紧凑重试。`components/portfolio-ai-chat-dialog.tsx` 打开时不创建请求；首次发送创建并保存固定请求快照，后续最多提交最近十二条消息，UI 最多保留二十四条。两个组件卸载或页面刷新后 state 清除，不写 IndexedDB、`localStorage`、导出或缓存。
+- 初始 `brief` 固定包含资产/现金配置、集中度、行业/主题、工具/潜在重叠、表现/贡献和数据边界六个不重复维度，`questions` 固定为空。独立 CHAT `answer` 可回答问题，但只能引用已知基础 evidence，必须返回 framework lenses；模型正文不承载数字，组件根据引用使用会话开始时 USD/CNY 真值生成证据标签。
+- `application/ai/value-investing-framework.ts` 维护顾问名称、非冒充披露、九个 lens enum/中文标签和系统政策。框架强制区分快照事实、框架推断、用户假设和未知；没有一手基本面时不得生成护城河、管理层、所有者收益或内在价值结论。
+- `components/portfolio-ai-consultation-panel.tsx` 只拥有一次组合体检 state，挂载即使用打开时 props 请求，渲染分类、暴露和六维 brief；后台 props 刷新不替换该结果，失败只保留紧凑重试。`components/portfolio-ai-chat-dialog.tsx` 打开时不创建请求，空态披露方法与运行时数据边界；首次发送创建并保存固定请求快照，后续最多提交最近十二条消息，UI 最多保留二十四条。两个组件卸载或页面刷新后 state 清除，不写 IndexedDB、`localStorage`、导出或缓存。
 - `application/ai/server/deepseek-portfolio-consultant.ts` 每次使用固定 system 说明、稳定快照前缀、固定确认消息和当前有限历史构建 messages。provider 固定调用官方 `https://api.deepseek.com/beta/chat/completions`，强制选择 `strict: true` 的 `return_portfolio_consultation` 函数并禁止重定向；INITIAL_ANALYSIS 的 schema 按请求动态列出每个 `positionId` 和六个维度，模型不能返回或改写 positionId/symbol/basis，服务端只把受限分类字段按原请求顺序重新附着。CHAT 只允许回答与基础 evidence，FOLLOW_UP 的既有分类由服务端原样附着。合法但过多的 evidence 在确认全量属于当前白名单且无重复后截为最多五项，未知或跨类引用仍整份拒绝。
 - INITIAL_ANALYSIS 使用七千 token 上限与二十五秒总超时，CHAT 使用一千八百 token 上限与十八秒总超时，首次温度均为零。首个候选未通过本机 contract 时，不把原始候选重新注入上下文，只能在同一个 abort window 内使用模式专属修复指令完整重做一次。严格函数 schema 不能替代本机长度、文字、证据语义和安全校验。
-- Vercel `/api/ai/portfolio-analysis` 当前只接受 schema v3；请求上限为 262,144 bytes，每实例每调用方每分钟十二次尽力限流，所有响应 `no-store`。Sites 页面要求登录，但 AI 费用仍必须使用 DeepSeek 受控余额作为硬上限。
+- Vercel `/api/ai/portfolio-analysis` 当前代码只接受 schema v4；请求上限为 262,144 bytes，每实例每调用方每分钟十二次尽力限流，所有响应 `no-store`。Sites 页面要求登录，但 AI 费用仍必须使用 DeepSeek 受控余额作为硬上限。本地实现不等于已发布；生产仍需 schema v4 合成 smoke 和真机验收。
 - `DEEPSEEK_API_KEY` 和 `PORTFOLIO_AI_ENABLED` 只存在 Vercel 服务端；后者为无需改代码的止血开关。上游空内容、截断、畸形 JSON、未知证据/持仓/分类、包含数字或直接交易指令的正文、429、超时和网络失败全部转成安全错误，不回显 provider body 或认证信息。确定性图表与持仓操作不依赖该路由。
 - `application/ai/portfolio-analysis-api.ts`、`ui/portfolio-ai-facts.ts` 与对应旧 client/provider 为 ADR-039 的未删除遗留模块，当前运行组件与路由不再导入；不能使用它们推定当前产品数据边界。
 
@@ -585,7 +586,7 @@ Controller 从当前 `PositionSnapshot[]`、已解析快照的 `previousRegularC
 - v4 来源持仓校准页、买入/卖出表单、券商与现金状态分段控件、来源股数/组合现金前后预览、单条组合现金行、负现金和待结算语义；
 - 总资产指标矩阵中的今日盈亏估算金额主值、组合涨跌幅副值，以及第五列逐股今日涨幅与小字今日盈亏金额、夜盘动态刷新、缺失状态和现金排除语义；
 - 真实当日趋势的加载、可用、缺失与纯现金状态，以及指针/键盘探查、减少动效、USD/CNY 派生和不提供长期假范围的边界；
-- 两个首页 AI 入口与独立 dialog；组合分析中的加载、行业/角色分类、六维体检、确定性结构/贡献、证据重绘和失败降级；AI 对话中的打开零请求、发送、连续历史、失败草稿、焦点管理与减少动效；
+- 两个首页 AI 入口与独立 dialog；组合分析中的加载、行业/角色分类、六维体检、确定性结构/贡献、证据重绘和失败降级；巴菲特框架顾问中的打开零请求、直接输入、非冒充/隐私披露、framework lens 标签、连续历史、失败草稿、焦点管理与减少动效；
 - 新版本更新时不破坏本地数据；
 - 不注册 Service Worker，也不承诺完整离线应用壳或离线编辑。
 
@@ -624,7 +625,7 @@ Sites Vinext 生产构建、owner-only 私有部署和 D1 运行链路已经通�
 - 用户导出的 JSON 含真实持仓数量、成本、IBKR 现金余额和 NAV，不得进入仓库、构建产物、日志、截图或测试 fixture；应用不得把文件内容上传 Vercel。
 - 用户选取的恢复文件先在浏览器内解析；错误详情不得回显整份文件。文件大小与格式在请求前拒绝，Sites `/api/portfolio` 在写边界再次验证文档和全 current 空目标，并通过单次 D1 CAS 提交或零变化。
 - 自动化与文档不得记录用户复制的真实持仓文本；剪贴板内容不得进入本产品日志、服务端错误或持久化缓存。普通复制不会产生外部 URL；ChatGPT 路径会把同一文本放入 `chatgpt.com` 请求 URL，因此自动化、截图、分析事件、导航诊断和错误回报不得保留完整 URL，只能使用合成持仓验证。
-- DeepSeek 请求只使用合成资料做测试与 smoke。生产中只有点按“组合分析”或在“AI 对话”发送才调用；请求会包含 current-only USD 快照中的真实股数、成本、价格、市值、盈亏、现金、NAV、行情时间和最近有限轮对话，不得包含姓名、账号、邮箱、设备标识、revision/savedAt、历史库、草稿、备份或剪贴板。生产代码、Vercel 日志、分析事件和错误回报不得记录请求体、模型原始响应、真实会话或调用方原始 IP。
+- DeepSeek 请求只使用合成资料做测试与 smoke。生产中只有点按“组合分析”或在“巴菲特框架顾问”发送才调用；请求会包含 current-only USD 快照中的真实股数、成本、价格、市值、盈亏、现金、NAV、行情时间和最近有限轮对话，不得包含姓名、账号、邮箱、设备标识、revision/savedAt、历史库、草稿、备份或剪贴板。顾问空态必须在发送前就地披露这两类字段。生产代码、Vercel 日志、分析事件和错误回报不得记录请求体、模型原始响应、真实会话或调用方原始 IP。
 - `[用户确认 2026-08-20]` OpenAI Sites、D1 与 ChatGPT 登录已获本次构建和部署授权；新增付费服务、第二数据库、外部身份提供方或扩大访问人群仍需另行授权。
 - 删除本地持仓前必须由用户对明确标的进行第二次确认；覆盖或迁移仍需恢复路径或明确确认。
 - 旧 current 删除 IBKR 现金前必须独立二次确认；v4 不使用独立现金删除，交易通过一条 current 同时提交来源股票、统一组合现金变化与事件。

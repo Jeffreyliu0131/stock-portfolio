@@ -1732,6 +1732,17 @@ body:has(.portfolio-terminal) {
   letter-spacing: -0.04em;
 }
 
+.portfolio-ai-chat-dialog__header > div {
+  min-width: 0;
+}
+
+.portfolio-ai-chat-dialog__header p {
+  margin: 0.2rem 0 0;
+  color: #778196;
+  font-size: 0.62rem;
+  line-height: 1.35;
+}
+
 .portfolio-ai-chat-dialog__header button {
   min-width: 3.65rem;
   min-height: 2.75rem;
@@ -1767,6 +1778,43 @@ body:has(.portfolio-terminal) {
   gap: 0.65rem;
 }
 
+.portfolio-ai-chat-dialog__intro {
+  padding: 1rem;
+  border: 1px solid #d9dfeb;
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 100% 0, rgb(185 151 83 / 16%), transparent 10rem),
+    #fff;
+  box-shadow: 0 0.25rem 1rem rgb(31 41 61 / 5%);
+}
+
+.portfolio-ai-chat-dialog__intro strong {
+  color: #202737;
+  font-size: 0.9rem;
+  letter-spacing: -0.02em;
+}
+
+.portfolio-ai-chat-dialog__intro p {
+  margin: 0.55rem 0 0;
+  color: #4f596c;
+  font-size: 0.72rem;
+  line-height: 1.65;
+}
+
+.portfolio-ai-chat-dialog__intro .portfolio-ai-chat-dialog__privacy {
+  padding-top: 0.55rem;
+  border-top: 1px solid #e5e8ef;
+  color: #5f697c;
+}
+
+.portfolio-ai-chat-dialog__intro > span {
+  display: block;
+  margin-top: 0.6rem;
+  color: #81899a;
+  font-size: 0.61rem;
+  line-height: 1.55;
+}
+
 .portfolio-ai-chat-dialog__message {
   max-width: 88%;
   padding: 0.72rem 0.8rem;
@@ -1794,6 +1842,24 @@ body:has(.portfolio-terminal) {
 
 .portfolio-ai-chat-dialog__message--user p {
   color: #fff;
+}
+
+.portfolio-ai-chat-dialog__lenses {
+  display: flex;
+  margin-top: 0.55rem;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.portfolio-ai-chat-dialog__lenses span {
+  padding: 0.22rem 0.46rem;
+  border: 1px solid #d7c8a5;
+  border-radius: 999px;
+  background: #fbf7ed;
+  color: #6f5a2d;
+  font-size: 0.6rem;
+  font-weight: 720;
+  line-height: 1.25;
 }
 
 .portfolio-ai-chat-dialog__thinking {

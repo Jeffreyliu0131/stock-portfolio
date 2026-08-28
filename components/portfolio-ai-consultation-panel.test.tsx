@@ -106,10 +106,10 @@ function source(applePrice = "200") {
 function successResponse() {
   return {
     kind: "PORTFOLIO_CONSULTATION_RESULT",
-    schemaVersion: 3,
+    schemaVersion: 4,
     generatedAt: "2026-08-15T07:00:05.000Z",
     model: "deepseek-v4-flash",
-    promptVersion: "portfolio-consultation-v3",
+    promptVersion: "portfolio-value-advisor-v4",
     mode: "INITIAL_ANALYSIS",
     ...initialPortfolioConsultationOutput(),
   };

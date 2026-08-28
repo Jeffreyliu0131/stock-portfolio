@@ -105,10 +105,10 @@ function source(applePrice = "200") {
 function successResponse() {
   return {
     kind: "PORTFOLIO_CONSULTATION_RESULT",
-    schemaVersion: 3,
+    schemaVersion: 4,
     generatedAt: "2026-08-15T07:00:05.000Z",
     model: "deepseek-v4-flash",
-    promptVersion: "portfolio-consultation-v3",
+    promptVersion: "portfolio-value-advisor-v4",
     mode: "CHAT",
     ...chatPortfolioConsultationOutput(),
   };
@@ -135,10 +135,15 @@ describe("PortfolioAiChatDialog", () => {
       />,
     );
 
-    const input = screen.getByPlaceholderText("输入问题");
+    const input = screen.getByPlaceholderText("直接问：这个判断的证据够吗？");
     await waitFor(() => expect(input).toHaveFocus());
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(screen.getByRole("dialog", { name: "AI 对话" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("dialog", { name: "巴菲特框架顾问" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("直接问一个投资问题")).toBeInTheDocument();
+    expect(screen.getByText(/不代表巴菲特本人/)).toBeInTheDocument();
+    expect(screen.getByText(/不发送姓名、邮箱、券商账号/)).toBeInTheDocument();
     expect(screen.queryByText("会发送给 DeepSeek")).not.toBeInTheDocument();
     expect(screen.queryByText("不会发送")).not.toBeInTheDocument();
     expect(screen.queryByText(/例如/)).not.toBeInTheDocument();
@@ -164,7 +169,7 @@ describe("PortfolioAiChatDialog", () => {
       />,
     );
 
-    fireEvent.change(screen.getByPlaceholderText("输入问题"), {
+    fireEvent.change(screen.getByPlaceholderText("直接问：这个判断的证据够吗？"), {
       target: { value: "现金在这个组合里起到什么作用？" },
     });
     fireEvent.click(screen.getByRole("button", { name: "发送" }));
@@ -195,6 +200,8 @@ describe("PortfolioAiChatDialog", () => {
       },
     });
     expect(screen.getByText(/USD 现金 \$1,000\.00 · 25\.00%/)).toBeInTheDocument();
+    expect(screen.getByText("机会成本")).toBeInTheDocument();
+    expect(screen.getByText("投资气质")).toBeInTheDocument();
   });
 
   it("keeps one snapshot and carries successful history across later turns", async () => {
@@ -222,7 +229,7 @@ describe("PortfolioAiChatDialog", () => {
       />,
     );
 
-    const input = screen.getByPlaceholderText("输入问题");
+    const input = screen.getByPlaceholderText("直接问：这个判断的证据够吗？");
     fireEvent.change(input, { target: { value: "当前组合最需要关注什么？" } });
     fireEvent.click(screen.getByRole("button", { name: "发送" }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
@@ -237,7 +244,7 @@ describe("PortfolioAiChatDialog", () => {
         onClose={onClose}
       />,
     );
-    fireEvent.change(screen.getByPlaceholderText("输入问题"), {
+    fireEvent.change(screen.getByPlaceholderText("直接问：这个判断的证据够吗？"), {
       target: { value: "再说说现金的作用。" },
     });
     fireEvent.click(screen.getByRole("button", { name: "发送" }));
@@ -275,7 +282,7 @@ describe("PortfolioAiChatDialog", () => {
         onClose={() => undefined}
       />,
     );
-    const input = screen.getByPlaceholderText("输入问题");
+    const input = screen.getByPlaceholderText("直接问：这个判断的证据够吗？");
     fireEvent.change(input, { target: { value: "帮我看一下当前结构。" } });
     fireEvent.click(screen.getByRole("button", { name: "发送" }));
 
@@ -297,7 +304,7 @@ describe("PortfolioAiChatDialog", () => {
         onClose={onClose}
       />,
     );
-    fireEvent.change(screen.getByPlaceholderText("输入问题"), {
+    fireEvent.change(screen.getByPlaceholderText("直接问：这个判断的证据够吗？"), {
       target: { value: "帮我看一下当前结构。" },
     });
     fireEvent.click(screen.getByRole("button", { name: "发送" }));

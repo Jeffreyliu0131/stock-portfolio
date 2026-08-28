@@ -13,6 +13,8 @@ Accepted
 
 Amended by ADR-044：两入口、触发和会话生命周期不变；完整快照的现金 contract 升级为双券商 schema/prompt v3。
 
+Further amended by ADR-049：独立、打开零请求和发送才调用不变；“AI 对话”升级为非冒充的“巴菲特框架顾问”，响应新增 framework lenses，空态恢复紧凑隐私披露。
+
 **Date:** 2026-08-15
 
 **Decider:** 产品所有者

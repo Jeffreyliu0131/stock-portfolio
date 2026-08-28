@@ -54,11 +54,13 @@ function internalArguments(
     return {
       text: output.answer?.text,
       evidenceRefs: output.answer?.evidenceRefs,
+      frameworkLenses: output.answer?.frameworkLenses,
     };
   }
   return {
     text: output.answer?.text,
     evidenceRefs: output.answer?.evidenceRefs,
+    frameworkLenses: output.answer?.frameworkLenses,
     suggestedQuestions: output.answer?.suggestedQuestions,
   };
 }
@@ -200,6 +202,12 @@ describe("consultPortfolioWithDeepSeek", () => {
       expect(body.messages[0]?.content).toContain(
         "集中度只使用“头部持仓”",
       );
+      expect(body.messages[0]?.content).toContain(
+        "不得自称本人",
+      );
+      expect(body.messages[0]?.content).toContain(
+        "所有者收益",
+      );
       expect(body.messages.at(-1)?.content).toContain("INITIAL_ANALYSIS");
       expect(body).not.toHaveProperty("user");
       return upstream(
@@ -315,6 +323,19 @@ describe("consultPortfolioWithDeepSeek", () => {
           readonly role: string;
           readonly content: string;
         }[];
+        readonly tools: readonly {
+          readonly function: {
+            readonly parameters: {
+              readonly properties: {
+                readonly frameworkLenses: {
+                  readonly minItems: number;
+                  readonly maxItems: number;
+                  readonly items: { readonly enum: readonly string[] };
+                };
+              };
+            };
+          };
+        }[];
       };
       expect(body.temperature).toBe(0);
       expect(body.max_tokens).toBe(1_800);
@@ -334,6 +355,16 @@ describe("consultPortfolioWithDeepSeek", () => {
       expect(body.messages[0]?.content).toContain(
         "CHAT 只直接回答当前问题",
       );
+      expect(body.messages[0]?.content).toContain(
+        "一手基本面证据",
+      );
+      expect(
+        body.tools[0]?.function.parameters.properties.frameworkLenses,
+      ).toMatchObject({ minItems: 1, maxItems: 3 });
+      expect(
+        body.tools[0]?.function.parameters.properties.frameworkLenses.items
+          .enum,
+      ).toContain("EVIDENCE_GAP");
       return upstream(chatPortfolioConsultationOutput(), "CHAT");
     });
 
