@@ -1,7 +1,7 @@
 # 文档地图与真源
 
 状态：Active  
-最后更新：2026-08-22（统一组合现金修订）
+最后更新：2026-08-28（Buffett Research System 本地实现）
 
 ## 当前结论
 
@@ -38,6 +38,8 @@
 `[用户确认 2026-08-09]` 首页增加组合结构与今日贡献详情。结构分母为已定价股票市值加现金本金，缺价时明确部分口径；组合今日净额要求全量可计算，绝对贡献占比按单股变化绝对值占可计算股票绝对变化总量计算，缺失不补 `0`。绑定决定见 ADR-032。
 
 `[用户确认 2026-08-13；2026-08-15、2026-08-28 修订]` 首页提供“组合分析”和“巴菲特框架顾问”两个独立入口与弹层。点按组合分析直接触发 DeepSeek V4 Flash 六维体检和逐只行业/角色推断，同时保留下方确定性结构与今日贡献；巴菲特框架顾问是非冒充的公开价值投资原则模拟，打开零请求且可直接输入，首次发送才建立完整 current-only USD 固定快照，后续附最近有限轮对话。空态披露方法边界和完整运行时数据边界，每个回答返回可验 framework lenses，一手基本面不足时停在证据缺口。本机 Decimal 数字、安全输出和无持久化边界继续有效。绑定决定见 ADR-049；ADR-049 修订 ADR-042，ADR-042 修订 ADR-041，ADR-039 已被取代。
+
+`[实现事实 2026-08-28，本地未发布]` 独立分支已实现 AAPL/MSFT 的 Buffett Research System：SEC/XBRL 与受限官方域名 Web Search 进入 Evidence Ledger，数字只由确定性计算产生，随后由无工具综合阶段输出带证据引用、反证、未知项和 Research Trace 的结构化结果。Web Search 仅作 discovery，事实结论必须引用 primary evidence；Owner Earnings 在维护性资本开支与营运资本拆分不足时停在假设缺口。614 项全量测试和 9/9 无凭据合成 eval 通过；尚未执行真实 SEC/OpenAI 联调、commit、push、merge 或部署。系统契约见 `AI-SYSTEM.md`，绑定决定见 ADR-050。
 
 `[实现事实 2026-08-13]` DeepSeek P0 通过 59 个测试文件、488 项测试及 TypeScript、领域构建和 Next.js 生产构建，生产依赖审计为 0。390/320 px 本地生产页面已验证主动同意、缺密钥降级、焦点返回和无横向溢出。功能提交 `18f0d1c` 已进入 GitHub `main` 与 Vercel Production；生产 UI 和合成无配置 `no-store` smoke 通过。Production 尚无 `DEEPSEEK_API_KEY`，provider 成功 smoke 和真实 iPhone 尚未验证。
 
@@ -88,13 +90,14 @@ v4 手工 BUY/SELL 已进入 current 维护；账号登录、D1 current 和同�
 | 3 | `02-DOMAIN-AND-CALCULATIONS.md` | 领域语义、公式、精度和行情状态 |
 | 4 | `03-UX-SPEC.md` | 页面、交互、文案和可见状态 |
 | 5 | `04-TECHNICAL-SPEC.md` | 当前实现、目标边界和实现差距 |
-| 6 | `10-MODULE-IMPLEMENTATION-MAP.md` | 本地模块、运行入口、写入边界、测试证据和未接入资产 |
-| 7 | `05-ACCEPTANCE-CRITERIA.md` | 可观察的通过条件 |
-| 8 | `06-TEST-STRATEGY.md` | 验证层次、样例和门禁 |
-| 9 | `07-DELIVERY-PLAN.md` | 交付顺序和每阶段出口 |
-| 10 | `08-OPEN-QUESTIONS.md` | 仍不能猜的产品与技术决定 |
-| 11 | `09-PRODUCTION-OPERATIONS.md` | 生产地址、发布、环境变量、smoke test、回滚和本地数据边界 |
-| 12 | `adr/README.md` | 架构决定及取代关系 |
+| 6 | `AI-SYSTEM.md` | Buffett Research 的运行契约、Prompt 分层、证据门禁与 eval 边界 |
+| 7 | `10-MODULE-IMPLEMENTATION-MAP.md` | 本地模块、运行入口、写入边界、测试证据和未接入资产 |
+| 8 | `05-ACCEPTANCE-CRITERIA.md` | 可观察的通过条件 |
+| 9 | `06-TEST-STRATEGY.md` | 验证层次、样例和门禁 |
+| 10 | `07-DELIVERY-PLAN.md` | 交付顺序和每阶段出口 |
+| 11 | `08-OPEN-QUESTIONS.md` | 仍不能猜的产品与技术决定 |
+| 12 | `09-PRODUCTION-OPERATIONS.md` | 生产地址、发布、环境变量、smoke test、回滚和本地数据边界 |
+| 13 | `adr/README.md` | 架构决定及取代关系 |
 
 ## 状态词
 

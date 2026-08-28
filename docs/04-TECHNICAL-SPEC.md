@@ -486,6 +486,17 @@ type PortfolioCopyTarget = "clipboard" | "chatgpt";
 - `DEEPSEEK_API_KEY` 和 `PORTFOLIO_AI_ENABLED` 只存在 Vercel 服务端；后者为无需改代码的止血开关。上游空内容、截断、畸形 JSON、未知证据/持仓/分类、包含数字或直接交易指令的正文、429、超时和网络失败全部转成安全错误，不回显 provider body 或认证信息。确定性图表与持仓操作不依赖该路由。
 - `application/ai/portfolio-analysis-api.ts`、`ui/portfolio-ai-facts.ts` 与对应旧 client/provider 为 ADR-039 的未删除遗留模块，当前运行组件与路由不再导入；不能使用它们推定当前产品数据边界。
 
+### 6.6A AAPL/MSFT 巴菲特研究流水线
+
+- `application/ai/research/supported-issuers.ts` 固定 AAPL/MSFT 的 CIK、公司名称与 SEC/官方 Web Search 域名。未支持 issuer 在任何上游调用前拒绝。
+- `buffett-research-api.ts` 限制请求只含 schema/version/time/locale/symbol/question，定义 Evidence Ledger、metrics、owner-earnings assumption、claims/findings/unknowns/counter-evidence 和 trace contract。
+- `sec-edgar-research.ts` 并行请求 `data.sec.gov/submissions` 与 `companyfacts`，使用服务端识别 User-Agent、固定 HTTPS origin、拒绝重定向、超时/字节上限和结构校验。首版只选取最新 annual revenue/net income/operating cash flow/capital expenditures 与最新 cash。
+- `openai-buffett-research.ts` 第一次 Responses 调用使用 `store:false`、强制 `web_search`、实时联网、发行人官方域名 allowlist 和完整 source list；输入只有发行人与问题。第二次 Responses 调用没有 tools，只读 Evidence Ledger/确定性指标/假设缺口，通过 strict JSON schema 返回。
+- `buffett-research-calculations.ts` 只在期间对齐时派生 net margin 和 `operating cash flow - total capital expenditures`；后者只是 free-cash-flow proxy。Owner Earnings 始终保留 `ASSUMPTION_REQUIRED`，不伪造维持性 CapEx。
+- `/api/ai/buffett-research` 使用 32 KiB 请求上限、每调用方低频限流、60 秒平台上限与 45 秒内部总超时；所有响应 `no-store`。`OPENAI_API_KEY`、`OPENAI_RESEARCH_MODEL` 与 `SEC_RESEARCH_USER_AGENT` 只存在服务端。
+- `portfolio-ai-research-dialog.tsx` 打开零请求，显示 issuer 选择、问题、隐私边界、确定性指标、所有者收益假设、framework findings、反证/未知、官方来源与 trace。研究结果不写持仓、D1、IndexedDB 或导出。
+- `npm run eval:buffett` 为无凭据 synthetic 门禁；SEC/OpenAI provider 测试使用 replay payload。该证据不支持 live retrieval/citation quality 主张。
+
 ## 7. 行情边界
 
 ### 7.1 已实现

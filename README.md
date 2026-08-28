@@ -1,6 +1,6 @@
 # Stock Portfolio + Buffett Framework Advisor
 
-An iPhone-first portfolio PWA that keeps financial math deterministic and lets the user question the current portfolio through an evidence-bound, Buffett-inspired value-investing framework.
+An iPhone-first portfolio PWA that keeps financial math deterministic, supports an evidence-bound Buffett-inspired portfolio coach, and demonstrates an official-source AAPL/MSFT AI research pipeline.
 
 The product records and values a portfolio; it does not place orders, recommend trades, promise real-time prices, or impersonate Warren Buffett. The advisor is a method simulation based on public value-investing principles and is not affiliated with Buffett or Berkshire Hathaway.
 
@@ -18,10 +18,11 @@ The model never becomes the source of truth for a price, weight, return, or port
 
 ## Ask directly from the portfolio
 
-The home screen keeps two separate tools:
+The home screen keeps three separate tools:
 
 - **Portfolio analysis** produces a six-dimension, evidence-linked snapshot review and AI-inferred instrument/sector classification.
 - **Buffett framework advisor** opens with the input focused and makes no request until the user sends a question.
+- **Buffett research system** sends only an AAPL/MSFT symbol and question, retrieves SEC/XBRL and official-domain Web Search evidence, runs deterministic calculations, and shows the answer beside sources, unknowns, counter-evidence, and a research trace.
 
 Each accepted answer identifies one to three explicit lenses:
 
@@ -45,6 +46,27 @@ flowchart LR
 
 The shared contract rejects unknown fields, invalid decimals, unknown evidence references, unrecognized framework lenses, generated numeric claims, URLs, external-news claims, direct trade instructions, malformed provider output, and over-limit payloads. The model cannot write positions, cash, quotes, history, or account state.
 
+## Buffett research system
+
+```mermaid
+flowchart LR
+  Q[Symbol + question] --> S[SEC submissions + XBRL]
+  Q --> W[Official-domain Web Search]
+  S --> L[Evidence Ledger]
+  W --> L
+  L --> C[Deterministic metrics]
+  C --> O[Owner-earnings assumption gate]
+  O --> Y[No-tool structured synthesis]
+  Y --> G[Claim + evidence + safety gate]
+  G --> U[Answer · sources · unknowns · trace]
+```
+
+The first slice supports AAPL and MSFT only. SEC facts are the canonical numeric lane. OpenAI Responses Web Search is restricted to SEC and issuer-owned domains and receives no portfolio quantities, costs, cash, or account data. Final synthesis has no tools and can reference only evidence ids enumerated by the server.
+
+`operating cash flow - total capital expenditures` is displayed only as a free-cash-flow proxy. Owner earnings remains assumption-required until maintenance capital expenditure and incremental working capital are reliably separated.
+
+See [the full AI system contract](docs/AI-SYSTEM.md) and [ADR-050](docs/adr/ADR-050-BUFFETT-RESEARCH-PIPELINE.md).
+
 ## What the advisor knows
 
 | Available in the current request | Explicitly unavailable unless separately supplied and verified |
@@ -63,6 +85,8 @@ This distinction is intentional: a Buffett-style vocabulary without the required
 The public snapshot contains synthetic data only. It contains no holdings, broker exports, account identifiers, portfolio backups, real-balance screenshots, emails, API keys, deployment account IDs, production origins, or database bindings.
 
 Runtime behavior is different and is disclosed in the advisor: sending a question transmits the current USD portfolio snapshot—symbols, names, quantities, costs, valuations, P/L, cash, and quote metadata—through the operator's server to the configured model provider. It excludes names, emails, broker account identifiers, device identifiers, history databases, backups, drafts, clipboard data, and internal storage metadata. Closing the dialog clears the in-memory conversation.
+
+The separate research system has a narrower boundary: it sends only the selected AAPL/MSFT symbol and research question to OpenAI Web Search. SEC retrieval and deterministic calculations run server-side; no holding quantity, cost basis, cash, or account state enters the research request.
 
 Credentials are server-only:
 
@@ -100,7 +124,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-The default example keeps AI disabled. To test a provider-backed route, set `PORTFOLIO_AI_ENABLED=true` and supply your own server-side `DEEPSEEK_API_KEY`. Optional delayed market data uses the server-side Alpaca variables in `.env.example`. No credential belongs in browser code or Git.
+The default example keeps AI disabled. Portfolio consultation uses server-side `DEEPSEEK_API_KEY`. Buffett research uses server-side `OPENAI_API_KEY`, `SEC_RESEARCH_USER_AGENT`, and an explicit `BUFFETT_RESEARCH_ENABLED=true`. Optional delayed market data uses the server-side Alpaca variables in `.env.example`. No credential belongs in browser code or Git.
 
 ## Verification
 
@@ -109,20 +133,21 @@ npm run public:check
 npm run audit:prod
 npm run typecheck
 npm test
+npm run eval:buffett
 npm run build:domain
 npm run build:next
 npm run bundle:check
 ```
 
-The current public snapshot passes 587 automated tests and uses synthetic records only. That demonstrates reproducible system behavior, not investment performance, user adoption, live-model quality, or financial outcomes.
+The current public snapshot passes 614 automated tests. The dedicated [Buffett research eval](evals/buffett-research/results/latest.md) passes 9/9 credential-free synthetic cases. That demonstrates reproducible contract behavior, not live retrieval freshness, citation entailment, investment performance, user adoption, model quality, or financial outcomes.
 
 ## Architecture
 
 - **UI:** Next.js/React with an iPhone-first PWA surface.
 - **Domain:** framework-independent Decimal portfolio, cash, market, history, and backup modules.
 - **Authenticated app:** account-isolated current state with revision-based conflict protection.
-- **Provider service:** market data, FX, instrument resolution, and optional DeepSeek behind exact-origin CORS.
-- **AI contract:** strict request/response schemas, evidence allowlists, value-investing lens enum, bounded history, output rejection, and one bounded retry.
+- **Provider service:** market data, FX, instrument resolution, DeepSeek consultation, SEC research, and OpenAI Responses Web Search behind exact-origin CORS.
+- **AI contract:** strict schemas, Evidence Ledger, official-domain source controls, deterministic numeric rendering, value-investing lens enum, output rejection, and explicit assumption gaps.
 - **Storage:** D1 current state plus device-local drafts and replaceable caches; AI chat is not persisted.
 
 The snapshot uses non-production example origins in [`application/http/provider-proxy-contract.ts`](application/http/provider-proxy-contract.ts). An independent deployment must replace both origins together and configure its own server credentials. No production hosting manifest or live account identifier is included.
@@ -141,6 +166,7 @@ The repository demonstrates a shipped system and decision discipline. It does no
 - [Technical specification](docs/04-TECHNICAL-SPEC.md)
 - [Acceptance criteria](docs/05-ACCEPTANCE-CRITERIA.md)
 - [Test strategy](docs/06-TEST-STRATEGY.md)
+- [AI system and prompt stack](docs/AI-SYSTEM.md)
 - [Architecture decisions](docs/adr/README.md)
 - [Security policy](SECURITY.md)
 

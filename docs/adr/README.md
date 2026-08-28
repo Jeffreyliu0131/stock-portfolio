@@ -60,6 +60,7 @@ ADR 状态：
 | [ADR-047](ADR-047-PUBLIC-PWA-INSTALL-ICONS.md) | 受保护 Sites 使用公开只读的 PWA 安装图标 | Accepted | Sites 继续 owner-only；版本化图标从固定 Vercel origin 匿名读取，普通功能更新仍自动生效 |
 | [ADR-048](ADR-048-UNIFIED-PORTFOLIO-CASH-POOL.md) | 所有股票买卖统一联动组合现金池 | Accepted | 无 BOXX/SGOV 特例；卖出净额进组合现金，买入总额从组合现金扣减；股票来源仍用于数量与成本 |
 | [ADR-049](ADR-049-BUFFETT-FRAMEWORK-ADVISOR.md) | 巴菲特公开原则驱动的价值投资顾问 | Accepted | 非冒充方法论模拟；回答必须返回可验 framework lenses，基本面不足时输出证据缺口，空态披露完整运行时数据边界 |
+| [ADR-050](ADR-050-BUFFETT-RESEARCH-PIPELINE.md) | AAPL/MSFT 巴菲特研究流水线 | Accepted | SEC/XBRL + 受限官方 Web Search + Evidence Ledger + 确定性计算 + 无工具综合 + replay eval |
 
 ## 当前绑定基线
 

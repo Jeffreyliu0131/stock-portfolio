@@ -964,7 +964,7 @@ describe("PortfolioDashboard", () => {
     expect(background).not.toHaveAttribute("aria-hidden");
   });
 
-  it("exposes separate analysis and AI chat entries with separate dialogs", async () => {
+  it("exposes separate analysis, chat, and research entries with separate dialogs", async () => {
     render(
       <PortfolioDashboard
         initialPortfolio={cashReadyFixture()}
@@ -986,11 +986,15 @@ describe("PortfolioDashboard", () => {
     const chatTrigger = screen.getByRole("button", {
       name: "巴菲特框架顾问",
     });
+    const researchTrigger = screen.getByRole("button", {
+      name: "巴菲特研究系统 · AAPL / MSFT",
+    });
     const consultationEntry = screen.getByRole("region", {
       name: "组合工具",
     });
     expect(consultationEntry).toContainElement(analysisTrigger);
     expect(consultationEntry).toContainElement(chatTrigger);
+    expect(consultationEntry).toContainElement(researchTrigger);
     expect(analysisTrigger.closest(".section-heading")).toBeNull();
     expect(consultationEntry).not.toHaveTextContent("DeepSeek");
     expect(consultationEntry).not.toHaveTextContent("当前组合上下文");
@@ -1000,7 +1004,7 @@ describe("PortfolioDashboard", () => {
     ).toHaveAttribute("href", "/data-safety");
     expect(
       within(more).queryByRole("button", {
-        name: /组合结构与今日贡献|组合分析|巴菲特框架顾问/,
+        name: /组合结构与今日贡献|组合分析|巴菲特框架顾问|巴菲特研究系统/,
       }),
     ).not.toBeInTheDocument();
     fireEvent.click(
@@ -1038,6 +1042,20 @@ describe("PortfolioDashboard", () => {
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
       expect(chatTrigger).toHaveFocus();
+    });
+
+    fireEvent.click(researchTrigger);
+    expect(
+      screen.getByRole("dialog", { name: "巴菲特研究系统" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "AAPL" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    fireEvent.keyDown(document, { key: "Escape" });
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(researchTrigger).toHaveFocus();
     });
   });
 

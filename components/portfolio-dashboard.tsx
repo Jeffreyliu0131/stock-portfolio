@@ -36,6 +36,7 @@ import type {
 import type { PortfolioInsights } from "../ui/portfolio-insights.ts";
 import { containModalFocus } from "./modal-accessibility.ts";
 import { PortfolioAiChatDialog } from "./portfolio-ai-chat-dialog.tsx";
+import { PortfolioAiResearchDialog } from "./portfolio-ai-research-dialog.tsx";
 import { PortfolioInsightsSheet } from "./portfolio-insights-sheet.tsx";
 import { PortfolioTrendChart } from "./portfolio-trend-chart.tsx";
 
@@ -485,6 +486,7 @@ export function PortfolioDashboard({
   const [moreSheetOpen, setMoreSheetOpen] = useState(false);
   const [insightsSheetOpen, setInsightsSheetOpen] = useState(false);
   const [aiChatOpen, setAiChatOpen] = useState(false);
+  const [aiResearchOpen, setAiResearchOpen] = useState(false);
   const longPressTimer = useRef<number | null>(null);
   const pressOrigin = useRef<{ x: number; y: number } | null>(null);
   const suppressNextClick = useRef(false);
@@ -498,6 +500,7 @@ export function PortfolioDashboard({
   const moreSheet = useRef<HTMLElement | null>(null);
   const insightsTrigger = useRef<HTMLButtonElement | null>(null);
   const aiChatTrigger = useRef<HTMLButtonElement | null>(null);
+  const aiResearchTrigger = useRef<HTMLButtonElement | null>(null);
 
   const clearLongPress = useCallback(() => {
     if (longPressTimer.current !== null) {
@@ -587,6 +590,18 @@ export function PortfolioDashboard({
     });
   }, []);
 
+  const closeAiResearch = useCallback(() => {
+    setAiResearchOpen(false);
+    requestAnimationFrame(() => {
+      const trigger = aiResearchTrigger.current;
+      if (trigger?.isConnected) {
+        trigger.focus();
+      } else {
+        moreTrigger.current?.focus();
+      }
+    });
+  }, []);
+
   useEffect(() => {
     if (insights === null) {
       if (insightsSheetOpen) {
@@ -595,8 +610,19 @@ export function PortfolioDashboard({
       if (aiChatOpen) {
         closeAiChat();
       }
+      if (aiResearchOpen) {
+        closeAiResearch();
+      }
     }
-  }, [aiChatOpen, closeAiChat, closeInsights, insights, insightsSheetOpen]);
+  }, [
+    aiChatOpen,
+    aiResearchOpen,
+    closeAiChat,
+    closeAiResearch,
+    closeInsights,
+    insights,
+    insightsSheetOpen,
+  ]);
 
   useEffect(() => {
     return clearLongPress;
@@ -1045,6 +1071,14 @@ export function PortfolioDashboard({
             onClick={() => setAiChatOpen(true)}
           >
             巴菲特框架顾问
+          </button>
+          <button
+            className="portfolio-ai-entry__button portfolio-ai-entry__button--research"
+            ref={aiResearchTrigger}
+            type="button"
+            onClick={() => setAiResearchOpen(true)}
+          >
+            巴菲特研究系统 · AAPL / MSFT
           </button>
         </section>
       ) : null}
@@ -1667,6 +1701,10 @@ export function PortfolioDashboard({
           usdCnyRate={usdCnyRate?.rate ?? null}
           onClose={closeAiChat}
         />
+      ) : null}
+
+      {aiResearchOpen && insights !== null ? (
+        <PortfolioAiResearchDialog onClose={closeAiResearch} />
       ) : null}
 
       {activePosition ? (

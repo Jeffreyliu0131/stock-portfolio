@@ -1091,6 +1091,36 @@ status: draft
 **When** 用户分别开始体检、查看行业/角色暴露与证据、展开逐只分类、在独立输入框连续追问或关闭
 **Then** 两个入口和两个弹层都不产生页面级横向溢出或裁切；顾问空态的直接提问、方法论披露、运行时数据边界和输入框在放大文字下仍可读，不增加前置按钮；分析失败只保留紧凑错误与重试。加载状态可读，回答仍在等待时也能立即关闭；焦点被限制在当前弹层并可恢复，减少动效时不依赖旋转动画表达状态
 
+### AC-AIR-01：研究请求不携带组合隐私
+
+**Given** 用户打开“巴菲特研究系统”
+**When** 选择 AAPL 或 MSFT 并提交问题
+**Then** 打开、选择和输入均为零请求；提交体只含 kind/schema/time/locale/symbol/question，不含股数、成本、市值、盈亏、现金、账号、设备、历史或备份。非 AAPL/MSFT 在任何上游调用前拒绝
+
+### AC-AIR-02：SEC 数字与 Web Search 来源分工正确
+
+**Given** 受支持 issuer 的 SEC submissions/companyfacts 与官方网页可用
+**When** 服务端建立 Evidence Ledger
+**Then** 精确数字只来自 SEC XBRL 与本机派生；Web Search 强制使用 SEC/发行人官方域名、`store:false`、完整 source list 和无组合事实输入。任一一手来源结构无效时不用模型记忆回填
+
+### AC-AIR-03：所有者收益不伪造精确值
+
+**Given** SEC 提供经营现金流与总资本支出，但没有可靠拆分维持性 CapEx 和增量营运资本
+**When** 系统计算并综合框架
+**Then** 可显示 `operating cash flow - total capital expenditures` 作为 free-cash-flow proxy；Owner Earnings 必须为 `ASSUMPTION_REQUIRED`，界面明示“需要假设”，模型不产生精确 Owner Earnings 数字
+
+### AC-AIR-04：最终综合只读 Evidence Ledger
+
+**Given** SEC/Web Search 阶段已完成
+**When** 进入巴菲特框架综合
+**Then** 最终 Responses 调用不含任何 tool，使用 strict JSON schema；每条 FACT、INFERENCE 与 finding 引用当前 ledger 中存在的 evidence id。生成数字、URL、未知 evidence、交易指令或冒充输出整份拒绝
+
+### AC-AIR-05：可见证据与 Eval 边界诚实
+
+**Given** 研究结果通过所有本机 contract
+**When** 用户查看结果或评审公开仓库
+**Then** UI 显示确定性指标、假设缺口、framework findings、反证、未知、可点一手来源与 Research Trace。`npm run eval:buffett` 只声称 synthetic/replay contract 结果；未进行真实 provider/人评时不声称 live citation 或研究质量
+
 ## 14. Robinhood-inspired 真实当日持仓估算线
 
 ### AC-TREND-01：服务端只读取市场标的

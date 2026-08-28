@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { requestPortfolioConsultation } from "../application/ai/browser/portfolio-consultation-client.ts";
+import { requestBuffettResearch } from "../application/ai/research/browser/buffett-research-client.ts";
 import { requestUsdCnyRate } from "../application/fx/browser/usd-cny-rate-client.ts";
 import {
   SITES_APP_ORIGIN,
@@ -10,6 +11,7 @@ import { requestInstrumentResolution } from "../application/instruments/browser/
 import { requestIntradayBars } from "../application/market-data/browser/intraday-bars-client.ts";
 import { requestDelayedQuotes } from "../application/market-data/browser/quote-client.ts";
 import { initialPortfolioConsultationRequest } from "./portfolio-consultation-fixtures.ts";
+import { aaplResearchRequest } from "./buffett-research-fixtures.ts";
 
 const AAPL = {
   listingMarket: "NASDAQ",
@@ -43,6 +45,9 @@ describe("provider clients on Sites", () => {
         fetchMock,
       ),
     ).rejects.toBeDefined();
+    await expect(
+      requestBuffettResearch(aaplResearchRequest(), fetchMock),
+    ).rejects.toBeDefined();
 
     expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
       `${VERCEL_PROVIDER_ORIGIN}/api/instruments/resolve`,
@@ -50,6 +55,7 @@ describe("provider clients on Sites", () => {
       `${VERCEL_PROVIDER_ORIGIN}/api/intraday-bars`,
       `${VERCEL_PROVIDER_ORIGIN}/api/fx/usd-cny`,
       `${VERCEL_PROVIDER_ORIGIN}/api/ai/portfolio-analysis`,
+      `${VERCEL_PROVIDER_ORIGIN}/api/ai/buffett-research`,
     ]);
     for (const [, init] of fetchMock.mock.calls) {
       expect(init?.credentials).toBe("omit");

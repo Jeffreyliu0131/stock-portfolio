@@ -352,6 +352,15 @@ provider、route 与 browser client 测试验证：
 
 组件测试分别验证：两个首页入口打开不同 dialog；组合分析挂载即请求并呈现紧凑加载/错误、行业/角色暴露、逐只分类/置信度、六个维度和本机 USD/CNY 证据；独立聊天打开、输入和关闭均为零请求，首次发送包含完整 `CHAT` 快照，后续只带最近六轮成功历史且父页刷新不替换固定快照，失败恢复草稿。两类弹层均验证不合规响应拒绝、确定性内容保留、无旧披露/示例/建议/重启噪音、焦点陷阱、Escape 和关闭清除。测试只使用合成股票和金额，不做真实 DeepSeek 网络调用。
 
+### 6.5A 巴菲特研究系统 Eval
+
+- request/response contract 覆盖 AAPL/MSFT、未支持 issuer、额外字段、问题长度、evidence id、重复 lens、生成数字、冒充与交易指令。
+- SEC adapter 使用合成 submissions/companyfacts payload，验证 User-Agent、HTTPS/redirect 边界、filing URL、annual/instant fact 选择和资料不足时 fail closed。
+- OpenAI replay 覆盖 `store:false`、强制 Web Search、SEC/发行人域名 allowlist、完整 source list、请求不含持仓字段、无 tool 最终综合和 strict JSON schema。
+- 确定性计算覆盖 period 一致、net margin、free-cash-flow proxy 与 Owner Earnings `ASSUMPTION_REQUIRED`。
+- route/client/UI 覆盖同源、大小/限流/无配置、`no-store`、零请求打开、issuer 选择、指标、来源、未知/反证、trace、Escape 和焦点恢复。
+- `npm run eval:buffett` 读取固定 synthetic case set；它不联网且不代替 live-provider 与双人盲评。公开说明必须保留该边界。
+
 ### 6.6 双券商 current、交易与 JSON v3 测试
 
 - 领域：校准唯一性、IBKR/moomoo 同标的、AAPL/BOXX/SGOV 等不同标的共享同一现金公式、碎股 BUY、手续费成本、SETTLED/PENDING 现金、部分/全部 SELL、移动平均剩余成本、超卖、负现金、fallback NAV 与 event id 幂等。

@@ -438,6 +438,18 @@ body:has(.portfolio-terminal) {
   background: #293247;
 }
 
+.portfolio-ai-entry__button--research {
+  border-color: #bca66f;
+  background: #fbf7ed;
+  color: #665328;
+  grid-column: 1 / -1;
+}
+
+.portfolio-ai-entry__button--research:hover {
+  border-color: #a88f54;
+  background: #f6eedb;
+}
+
 .portfolio-account .section-heading {
   position: absolute;
   width: 1px;
@@ -1938,6 +1950,418 @@ body:has(.portfolio-terminal) {
   color: #a0443b;
   font-size: 0.68rem;
   line-height: 1.45;
+}
+
+.portfolio-ai-research-backdrop {
+  padding:
+    max(0.5rem, env(safe-area-inset-top))
+    max(0.5rem, env(safe-area-inset-right))
+    max(0.5rem, env(safe-area-inset-bottom))
+    max(0.5rem, env(safe-area-inset-left));
+}
+
+.portfolio-account .portfolio-ai-research-dialog {
+  width: min(100%, 52rem);
+  max-height: 96dvh;
+  overflow: auto;
+  border: 1px solid #c9c0ad;
+  border-radius: 1.35rem;
+  background: #f6f4ee;
+  box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 34%);
+  color: #242722;
+  overscroll-behavior: contain;
+}
+
+.portfolio-ai-research-dialog__header {
+  position: sticky;
+  z-index: 3;
+  top: 0;
+  display: flex;
+  min-height: 4.7rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.05rem 0.8rem 1.2rem;
+  border-bottom: 1px solid #ddd7c9;
+  background: rgb(255 255 255 / 96%);
+  backdrop-filter: blur(0.8rem);
+  gap: 1rem;
+}
+
+.portfolio-ai-research-dialog__header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.portfolio-ai-research-dialog__header p {
+  margin: 0.2rem 0 0;
+  color: #7b7568;
+  font-size: 0.62rem;
+  line-height: 1.35;
+}
+
+.portfolio-ai-research-dialog__header button {
+  min-width: 3.65rem;
+  min-height: 2.75rem;
+  border: 0;
+  background: transparent;
+  color: #765f2c;
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 760;
+}
+
+.portfolio-ai-research-form {
+  padding: 1rem 1.15rem;
+  border-bottom: 1px solid #ddd7c9;
+  background: #fff;
+}
+
+.portfolio-ai-research-form fieldset {
+  padding: 0;
+  margin: 0 0 0.8rem;
+  border: 0;
+}
+
+.portfolio-ai-research-form legend,
+.portfolio-ai-research-form > label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: #6c665b;
+  font-size: 0.66rem;
+  font-weight: 750;
+}
+
+.portfolio-ai-research-symbols {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.portfolio-ai-research-symbols button {
+  min-width: 4.5rem;
+  min-height: 2.35rem;
+  border: 1px solid #cfc8b9;
+  border-radius: 999px;
+  background: #f8f6f1;
+  color: #5e594e;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 780;
+}
+
+.portfolio-ai-research-symbols button[aria-pressed="true"] {
+  border-color: #6a5830;
+  background: #2c2a25;
+  color: #fff;
+}
+
+.portfolio-ai-research-form__composer {
+  display: flex;
+  align-items: flex-end;
+  padding: 0.35rem;
+  border: 1px solid #cfc8b9;
+  border-radius: 0.9rem;
+  background: #fff;
+  gap: 0.45rem;
+}
+
+.portfolio-ai-research-form__composer textarea {
+  width: 100%;
+  min-height: 3rem;
+  max-height: 9rem;
+  resize: vertical;
+  padding: 0.5rem;
+  border: 0;
+  background: transparent;
+  color: #292b27;
+  font: inherit;
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.portfolio-ai-research-form__composer textarea:focus {
+  outline: none;
+}
+
+.portfolio-ai-research-form__composer button {
+  min-width: 4rem;
+  min-height: 2.55rem;
+  border: 0;
+  border-radius: 0.7rem;
+  background: #2c2a25;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.69rem;
+  font-weight: 780;
+}
+
+.portfolio-ai-research-form__composer button:disabled,
+.portfolio-ai-research-symbols button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.portfolio-ai-research-form__privacy {
+  margin: 0.6rem 0 0;
+  color: #817a6d;
+  font-size: 0.61rem;
+  line-height: 1.5;
+}
+
+.portfolio-ai-research-content {
+  padding: 1rem 1.15rem max(1.25rem, env(safe-area-inset-bottom));
+}
+
+.portfolio-ai-research-loading {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #d8d1c2;
+  border-radius: 1rem;
+  background: #fff;
+  gap: 0.75rem;
+}
+
+.portfolio-ai-research-loading strong,
+.portfolio-ai-research-loading p {
+  display: block;
+  margin: 0;
+}
+
+.portfolio-ai-research-loading strong {
+  font-size: 0.8rem;
+}
+
+.portfolio-ai-research-loading p {
+  margin-top: 0.25rem;
+  color: #746f64;
+  font-size: 0.65rem;
+  line-height: 1.5;
+}
+
+.portfolio-ai-research-error {
+  padding: 0.75rem;
+  margin: 0;
+  border: 1px solid #e2b8af;
+  border-radius: 0.8rem;
+  background: #fff6f3;
+  color: #91483e;
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.portfolio-ai-research-result > header {
+  padding: 1.05rem;
+  border: 1px solid #d8d1c2;
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 100% 0, rgb(179 146 73 / 16%), transparent 12rem),
+    #fff;
+}
+
+.portfolio-ai-research-result > header > span {
+  color: #806c3c;
+  font-size: 0.62rem;
+  font-weight: 780;
+}
+
+.portfolio-ai-research-result h3 {
+  margin: 0.35rem 0 0;
+  font-size: 1.15rem;
+  letter-spacing: -0.03em;
+}
+
+.portfolio-ai-research-result > header p,
+.portfolio-ai-research-result section p,
+.portfolio-ai-research-result li {
+  color: #55594f;
+  font-size: 0.69rem;
+  line-height: 1.62;
+}
+
+.portfolio-ai-research-result section {
+  margin-top: 1rem;
+}
+
+.portfolio-ai-research-result h4 {
+  margin: 0 0 0.55rem;
+  font-size: 0.78rem;
+}
+
+.portfolio-ai-research-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.portfolio-ai-research-metrics > div {
+  display: flex;
+  min-width: 0;
+  padding: 0.7rem;
+  border: 1px solid #ddd7c9;
+  border-radius: 0.75rem;
+  background: #fff;
+  flex-direction: column;
+}
+
+.portfolio-ai-research-metrics span,
+.portfolio-ai-research-metrics small {
+  color: #7a756b;
+  font-size: 0.58rem;
+}
+
+.portfolio-ai-research-metrics strong {
+  margin: 0.2rem 0;
+  overflow: hidden;
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portfolio-ai-research-assumption {
+  padding: 0.7rem;
+  border-left: 0.2rem solid #a88f54;
+  background: #fbf7ed;
+}
+
+.portfolio-ai-research-assumption strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: #665328;
+}
+
+.portfolio-ai-research-findings {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.portfolio-ai-research-findings article {
+  padding: 0.8rem;
+  border: 1px solid #ddd7c9;
+  border-radius: 0.8rem;
+  background: #fff;
+}
+
+.portfolio-ai-research-findings article > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.portfolio-ai-research-findings article > div span {
+  color: #765f2c;
+  font-size: 0.6rem;
+  font-weight: 780;
+}
+
+.portfolio-ai-research-findings article > div small {
+  color: #898277;
+  font-size: 0.55rem;
+}
+
+.portfolio-ai-research-findings h5 {
+  margin: 0.35rem 0 0;
+  font-size: 0.74rem;
+}
+
+.portfolio-ai-research-findings p {
+  margin: 0.25rem 0 0;
+}
+
+.portfolio-ai-research-two-column {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.portfolio-ai-research-two-column > div {
+  padding: 0.75rem;
+  border: 1px solid #ddd7c9;
+  border-radius: 0.8rem;
+  background: #fff;
+}
+
+.portfolio-ai-research-two-column ul,
+.portfolio-ai-research-sources {
+  padding-left: 1rem;
+  margin: 0;
+}
+
+.portfolio-ai-research-sources li + li {
+  margin-top: 0.45rem;
+}
+
+.portfolio-ai-research-sources a {
+  color: #495b9e;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.portfolio-ai-research-sources span {
+  display: block;
+  color: #8a8479;
+  font-size: 0.56rem;
+}
+
+.portfolio-ai-research-trace {
+  padding: 0.75rem;
+  margin-top: 1rem;
+  border: 1px solid #d8d1c2;
+  border-radius: 0.8rem;
+  background: #efede7;
+}
+
+.portfolio-ai-research-trace summary {
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 780;
+}
+
+.portfolio-ai-research-trace ol {
+  padding-left: 1.1rem;
+  margin: 0.7rem 0 0;
+}
+
+.portfolio-ai-research-trace li + li {
+  margin-top: 0.4rem;
+}
+
+.portfolio-ai-research-trace strong,
+.portfolio-ai-research-trace span {
+  display: block;
+}
+
+.portfolio-ai-research-trace strong {
+  color: #6b603f;
+  font-size: 0.58rem;
+}
+
+.portfolio-ai-research-trace span {
+  color: #69685f;
+  font-size: 0.62rem;
+  line-height: 1.45;
+}
+
+.portfolio-ai-research-dialog__header button:focus-visible,
+.portfolio-ai-research-form button:focus-visible,
+.portfolio-ai-research-form textarea:focus-visible,
+.portfolio-ai-research-sources a:focus-visible,
+.portfolio-ai-research-trace summary:focus-visible {
+  outline: 3px solid rgb(118 95 44 / 24%);
+  outline-offset: 2px;
+}
+
+@media (max-width: 27rem) {
+  .portfolio-ai-research-two-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-ai-research-loading .portfolio-ai-loading__mark {
+    animation: none;
+  }
 }
 
 .insight-section.insight-section--ai {

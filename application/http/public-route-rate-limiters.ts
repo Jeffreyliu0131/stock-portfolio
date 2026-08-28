@@ -25,6 +25,11 @@ export const portfolioAiRouteLimiter = new SlidingWindowRateLimiter({
   windowMs: 60_000,
 });
 
+export const buffettResearchRouteLimiter = new SlidingWindowRateLimiter({
+  limit: 4,
+  windowMs: 60_000,
+});
+
 export function resetInstrumentRateLimitForTests(): void {
   instrumentRouteLimiter.clear();
 }
@@ -39,4 +44,8 @@ export function resetIntradayBarsRateLimitForTests(): void {
 
 export function resetPortfolioAiRateLimitForTests(): void {
   portfolioAiRouteLimiter.clear();
+}
+
+export function resetBuffettResearchRateLimitForTests(): void {
+  buffettResearchRouteLimiter.clear();
 }

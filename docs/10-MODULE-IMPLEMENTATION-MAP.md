@@ -194,6 +194,14 @@ flowchart LR
 - **证据：** `tests/value-investing-framework.test.ts`、`tests/portfolio-consultation-api.test.ts`、`ui/portfolio-consultation-context.test.ts`、`tests/deepseek-portfolio-consultant.test.ts`、`tests/portfolio-ai-route.test.ts`、`tests/portfolio-consultation-client.test.ts`、`tests/sliding-window-rate-limiter.test.ts`、`components/portfolio-ai-consultation-panel.test.tsx`、`components/portfolio-ai-chat-dialog.test.tsx`、`components/portfolio-insights-sheet.test.tsx`、`components/portfolio-dashboard.test.tsx`。
 - **真源：** ADR-049、ADR-042（经修订）、ADR-041（经修订）、PRD FR-14、`04-TECHNICAL-SPEC.md` 第 6.6 节。ADR-039 对应的 v1 模块仍留在仓库，但当前 route 与 UI 不再导入。
 
+### 3.10B AAPL/MSFT 巴菲特研究系统
+
+- **代码：** `application/ai/research/`、`app/api/ai/buffett-research/route.ts`、`components/portfolio-ai-research-dialog.tsx`、`evals/buffett-research/`。
+- **职责：** 将受支持 issuer 与问题分别交给 SEC/XBRL 一手数据和官方域名 OpenAI Web Search，建立 Evidence Ledger，派生确定性指标，保留 Owner Earnings 假设缺口，再通过无工具 strict synthesis 生成 claims/findings/unknowns/counter-evidence。
+- **写入：** 无资产、D1、IndexedDB 或研究持久化写入。请求只含 symbol/question；provider raw payload 和真实研究结果不记录。
+- **证据：** `tests/buffett-research-*.test.ts`、`tests/sec-edgar-research.test.ts`、`tests/openai-buffett-research.test.ts`、`components/portfolio-ai-research-dialog.test.tsx`、`npm run eval:buffett`。全部自动证据是 synthetic/replay，不是 live provider 或人评。
+- **真源：** ADR-050、`docs/AI-SYSTEM.md`、PRD 研究系统条目、`04-TECHNICAL-SPEC.md` 第 6.6A 节。
+
 ### 3.11 低噪音持仓复制与双目标交付
 
 - **代码：** `ui/portfolio-copy-text.ts`、`application/positions/browser/copy-portfolio-text.ts`、`application/positions/browser/deliver-chatgpt-prompt.ts`、`components/portfolio-controller.tsx`、`components/portfolio-dashboard.tsx`。

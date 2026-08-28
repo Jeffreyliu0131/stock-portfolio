@@ -11,6 +11,8 @@ status: accepted
 
 Accepted
 
+Extended by ADR-050: the snapshot-only advisor remains available; a separate AAPL/MSFT official-source research pipeline adds SEC, Web Search, Evidence Ledger, deterministic calculations, and replay evals.
+
 **Date:** 2026-08-28
 
 **Decider:** 产品所有者

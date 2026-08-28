@@ -61,6 +61,7 @@ for (const path of paths) {
 const envExample = readFileSync(".env.example", "utf8");
 for (const name of [
   "DEEPSEEK_API_KEY",
+  "OPENAI_API_KEY",
   "ALPACA_API_KEY_ID",
   "ALPACA_API_SECRET_KEY",
 ]) {

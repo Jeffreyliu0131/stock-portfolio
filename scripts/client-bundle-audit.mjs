@@ -16,6 +16,7 @@ function filesBelow(path) {
 
 const forbiddenPatterns = [
   /DEEPSEEK_API_KEY/u,
+  /OPENAI_API_KEY/u,
   /ALPACA_API_KEY_ID/u,
   /ALPACA_API_SECRET_KEY/u,
   /replace-with-your-server-only/u,
