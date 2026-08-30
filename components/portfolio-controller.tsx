@@ -55,7 +55,10 @@ import {
   type ResolvedQuote,
   type ValidMarketQuote,
 } from "../domain/index.ts";
-import type { PortfolioFixture } from "../ui/portfolio-fixtures.ts";
+import {
+  getPortfolioFixture,
+  type PortfolioFixture,
+} from "../ui/portfolio-fixtures.ts";
 import {
   createPortfolioCopySource,
   createPortfolioCopyText,
@@ -77,6 +80,37 @@ const TREND_REFRESH_INTERVAL_MS = 5 * 60_000;
 const FX_REFRESH_INTERVAL_MS = 15 * 60_000;
 const CASH_READ_FAILURE_NOTICE =
   "现金记录暂时无法读取，股票持仓仍可查看；没有清空任何数据。";
+
+const DEVELOPMENT_PREVIEW_TREND: PortfolioTrendResult = {
+  status: "READY",
+  referenceValue: "46880",
+  points: [
+    {
+      sourceEventAt: "2026-08-07T14:30:00Z",
+      estimatedDailyPriceEffect: "120",
+      estimatedDailyChangeRate: "0.00255972696245733788",
+      estimatedAsset: "47000",
+      segment: "SIP_HISTORY",
+      connectFromPrevious: false,
+    },
+    {
+      sourceEventAt: "2026-08-07T15:30:00Z",
+      estimatedDailyPriceEffect: "320",
+      estimatedDailyChangeRate: "0.00682593856655290102",
+      estimatedAsset: "47200",
+      segment: "SIP_HISTORY",
+      connectFromPrevious: true,
+    },
+    {
+      sourceEventAt: "2026-08-07T16:30:00Z",
+      estimatedDailyPriceEffect: "553.89",
+      estimatedDailyChangeRate: "0.011815913312287",
+      estimatedAsset: "47433.89",
+      segment: "SIP_HISTORY",
+      connectFromPrevious: true,
+    },
+  ],
+};
 
 function quoteValue(
   quote: ResolvedQuote,
@@ -291,6 +325,10 @@ export function shouldShowUnavailableNotice(
 }
 
 export function PortfolioController() {
+  const developmentPreviewEnabled =
+    process.env.NODE_ENV === "development" &&
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("fixture") === "ready";
   const repositoryRef = useRef<PortfolioRepository | null>(null);
   const quoteStoreRef = useRef<IndexedDbLastValidQuoteStore | null>(null);
   const snapshotsRef = useRef<readonly PositionSnapshot[]>([]);
@@ -934,6 +972,26 @@ export function PortfolioController() {
   );
 
   useEffect(() => {
+    if (developmentPreviewEnabled) {
+      const fixture = getPortfolioFixture("ready");
+      setPortfolio(
+        fixture.viewState === "ready"
+          ? {
+              ...fixture,
+              status: {
+                source: "本地合成预览数据，不代表真实持仓或实时行情。",
+              },
+            }
+          : fixture,
+      );
+      setTrend(DEVELOPMENT_PREVIEW_TREND);
+      setIsTrendLoading(false);
+      setInsights(null);
+      setCnyPortfolio(null);
+      setUsdCnyRate(null);
+      setIsFxRateUnavailable(false);
+      return;
+    }
     void load(true);
     void refreshFxRate(true);
 
@@ -976,7 +1034,7 @@ export function PortfolioController() {
       // permanently in its loading state. A real unmount owns fresh refs, so
       // late state updates from this instance are ignored by React.
     };
-  }, [load, refreshFxRate]);
+  }, [developmentPreviewEnabled, load, refreshFxRate]);
 
   return (
     <PortfolioDashboard
@@ -997,10 +1055,18 @@ export function PortfolioController() {
       onCopyPositions={copyPositions}
       onExportBackup={() => void exportBackup()}
       onRefresh={() => {
+        if (developmentPreviewEnabled) {
+          setNotice("当前为本地合成预览，未请求账号或市场数据。");
+          return;
+        }
         void load(true);
         void refreshFxRate(true);
       }}
-      onRetry={() => void load(true)}
+      onRetry={() => {
+        if (!developmentPreviewEnabled) {
+          void load(true);
+        }
+      }}
       onDelete={deletePosition}
     />
   );

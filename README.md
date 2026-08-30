@@ -124,6 +124,8 @@ cp .env.example .env.local
 npm run dev
 ```
 
+For a credential-free visual review, append `?fixture=ready` to the printed local URL. This development-only view uses the committed synthetic portfolio fixture, makes no account or market-data request, and labels the data as synthetic in the interface.
+
 The default example keeps AI disabled. Portfolio consultation uses server-side `DEEPSEEK_API_KEY`. Buffett research uses server-side `OPENAI_API_KEY`, `SEC_RESEARCH_USER_AGENT`, and an explicit `BUFFETT_RESEARCH_ENABLED=true`. Optional delayed market data uses the server-side Alpaca variables in `.env.example`. No credential belongs in browser code or Git.
 
 ## Verification

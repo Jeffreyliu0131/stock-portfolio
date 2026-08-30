@@ -3,8 +3,7 @@ import type { ReactNode } from "react";
 
 import "./globals.css";
 import "./quiet-tech.css";
-import "./portfolio-premium.css";
-import "./obsidian-aurora.css";
+import "./portfolio-taste.css";
 import { PWA_ICONS } from "./pwa-branding";
 import { SITES_APP_ORIGIN } from "../application/http/provider-proxy-contract";
 
@@ -61,8 +60,11 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#050506",
-  colorScheme: "light",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#e9edf2" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f1217" },
+  ],
+  colorScheme: "light dark",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

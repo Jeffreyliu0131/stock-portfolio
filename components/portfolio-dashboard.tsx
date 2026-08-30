@@ -78,6 +78,12 @@ type CopyToast = {
 
 type TrendDirection = "positive" | "negative" | "neutral";
 
+function displayMetric(value: string | null | undefined): string {
+  return value === undefined || value === null || value === "—"
+    ? "暂无"
+    : value;
+}
+
 function navigateHoldingsTable(
   event: KeyboardEvent<HTMLDivElement>,
 ) {
@@ -811,6 +817,8 @@ export function PortfolioDashboard({
       : initialPortfolio;
   const headlineChange = visiblePortfolio.dailyChange;
   const headlineRate = visiblePortfolio.dailyChangeRate;
+  const displayedHeadlineChange = displayMetric(headlineChange);
+  const displayedHeadlineRate = displayMetric(headlineRate);
   const headlineDirection: TrendDirection =
     visiblePortfolio.dailyChangeDirection;
 
@@ -903,7 +911,10 @@ export function PortfolioDashboard({
         </div>
       ) : null}
       <header className="portfolio-header">
-        <h1>总仓位</h1>
+        <div className="portfolio-header__title">
+          <h1>总仓位</h1>
+          <p>资产事实与判断边界</p>
+        </div>
         <div className="portfolio-header__controls">
           <div
             className="currency-mode-switch"
@@ -950,6 +961,8 @@ export function PortfolioDashboard({
         </p>
       ) : null}
 
+      <div className="portfolio-workspace">
+      <div className="portfolio-overview-column">
       <section
         className="account-summary"
         id="asset-overview"
@@ -963,14 +976,14 @@ export function PortfolioDashboard({
             <span>{displayCurrency}</span>
           </div>
           <p className="account-summary__value numeric">
-            {visiblePortfolio.marketValue}
+            {displayMetric(visiblePortfolio.marketValue)}
           </p>
           <p
             className={`account-summary__headline-change account-summary__pnl account-summary__pnl--${headlineDirection}`}
-            aria-label={`今日收益 ${headlineChange}，收益率 ${headlineRate}`}
+            aria-label={`今日收益 ${displayedHeadlineChange}，收益率 ${displayedHeadlineRate}`}
           >
-            <strong className="numeric">{headlineChange}</strong>
-            <span className="numeric">{headlineRate}</span>
+            <strong className="numeric">{displayedHeadlineChange}</strong>
+            <span className="numeric">{displayedHeadlineRate}</span>
             <small>今日</small>
           </p>
         </div>
@@ -987,15 +1000,15 @@ export function PortfolioDashboard({
             <dt>今日盈亏</dt>
             <dd
               className={`account-summary__metric-value account-summary__daily-pnl account-summary__pnl account-summary__pnl--${visiblePortfolio.dailyChangeDirection}`}
-              aria-label={`今日盈亏估算 ${visiblePortfolio.dailyChange}，今日涨跌幅 ${visiblePortfolio.dailyChangeRate}`}
+              aria-label={`今日盈亏估算 ${displayMetric(visiblePortfolio.dailyChange)}，今日涨跌幅 ${displayMetric(visiblePortfolio.dailyChangeRate)}`}
             >
               <strong className="numeric">
-                {visiblePortfolio.dailyChange}
+                {displayMetric(visiblePortfolio.dailyChange)}
               </strong>
               <span className="numeric">
                 {visiblePortfolio.positions.length === 0
                   ? "现金不参与计算"
-                  : `${visiblePortfolio.dailyChangeRate} · 估算`}
+                  : `${displayMetric(visiblePortfolio.dailyChangeRate)} · 估算`}
               </span>
             </dd>
           </div>
@@ -1010,9 +1023,9 @@ export function PortfolioDashboard({
             <dd
               className={`account-summary__metric-value account-summary__pnl account-summary__pnl--${visiblePortfolio.pnlDirection}`}
             >
-              <strong className="numeric">{visiblePortfolio.pnl}</strong>
+              <strong className="numeric">{displayMetric(visiblePortfolio.pnl)}</strong>
               <span className="numeric">
-                {visiblePortfolio.returnRate}
+                {displayMetric(visiblePortfolio.returnRate)}
               </span>
             </dd>
           </div>
@@ -1022,7 +1035,7 @@ export function PortfolioDashboard({
             </dt>
             <dd className="account-summary__metric-value">
               <strong className="numeric">
-                {visiblePortfolio.stockOpenCost}
+                {displayMetric(visiblePortfolio.stockOpenCost)}
               </strong>
               <span>剩余成本</span>
             </dd>
@@ -1031,7 +1044,7 @@ export function PortfolioDashboard({
             <dt>{displayCurrency === "CNY" ? "折算现金" : "现金"}</dt>
             <dd className="account-summary__metric-value">
               <strong className="numeric">
-                {visiblePortfolio.cash?.balance ?? "—"}
+                {displayMetric(visiblePortfolio.cash?.balance)}
               </strong>
               <span>
                 {visiblePortfolio.cash === null
@@ -1082,7 +1095,10 @@ export function PortfolioDashboard({
           </button>
         </section>
       ) : null}
+      <BottomEntryAction brokerPortfolioActive={brokerPortfolioActive} />
+      </div>
 
+      <div className="portfolio-ledger-column">
       <section className="positions-section" aria-labelledby="positions-heading">
         <div className="section-heading">
           <div className="section-heading__title">
@@ -1177,7 +1193,7 @@ export function PortfolioDashboard({
                   data-label="市值 / 数量"
                 >
                   <strong className="numeric position-cell__primary">
-                    {position.marketValue}
+                    {displayMetric(position.marketValue)}
                   </strong>
                   <span className="numeric position-cell__secondary">
                     {position.quantity} 股
@@ -1188,10 +1204,10 @@ export function PortfolioDashboard({
                   data-label="估值价 / 均价"
                 >
                   <strong className="numeric position-cell__primary">
-                    {position.valuationPrice}
+                    {displayMetric(position.valuationPrice)}
                   </strong>
                   <span className="numeric position-cell__secondary">
-                    {position.averageCost}
+                    {displayMetric(position.averageCost)}
                   </span>
                 </div>
                 <div
@@ -1199,10 +1215,10 @@ export function PortfolioDashboard({
                   data-label="盈亏 / 收益率"
                 >
                   <strong className={positionPnlTone(position)}>
-                    {position.pnl}
+                    {displayMetric(position.pnl)}
                   </strong>
                   <span className={positionReturnTone(position)}>
-                    {position.returnRate}
+                    {displayMetric(position.returnRate)}
                   </span>
                 </div>
                 <div
@@ -1210,7 +1226,7 @@ export function PortfolioDashboard({
                   data-label="今日涨幅"
                 >
                   <strong className={positionDailyRateTone(position)}>
-                    {position.dailyChangeRate}
+                    {displayMetric(position.dailyChangeRate)}
                   </strong>
                   <span className={positionDailyChangeTone(position)}>
                     {position.dailyChange === "—" ? "暂无" : position.dailyChange}
@@ -1233,7 +1249,7 @@ export function PortfolioDashboard({
                   data-label="现金余额"
                 >
                   <span className="cash-cell__label">现金余额</span>
-                  <strong className="numeric position-cell__primary">—</strong>
+                  <strong className="numeric position-cell__primary">暂无</strong>
                   <span className="position-cell__secondary">点按录入</span>
                 </div>
                 <div
@@ -1249,7 +1265,7 @@ export function PortfolioDashboard({
                   data-label="估算利息"
                 >
                   <span className="cash-cell__label">估算利息</span>
-                  <strong className="position-cell__primary cash-row__action">—</strong>
+                  <strong className="position-cell__primary cash-row__action">暂无</strong>
                   <span className="position-cell__secondary">录入后计算</span>
                 </div>
                 <div
@@ -1257,7 +1273,7 @@ export function PortfolioDashboard({
                   data-label="今日变化"
                 >
                   <span className="cash-cell__label">今日变化</span>
-                  <strong className="numeric position-cell__primary">—</strong>
+                  <strong className="numeric position-cell__primary">暂无</strong>
                   <span className="position-cell__secondary">不参与</span>
                 </div>
               </Link>
@@ -1302,7 +1318,7 @@ export function PortfolioDashboard({
                   data-label="今日变化"
                 >
                   <span className="cash-cell__label">今日变化</span>
-                  <strong className="numeric position-cell__primary">—</strong>
+                  <strong className="numeric position-cell__primary">暂无</strong>
                   <span className="position-cell__secondary">不参与</span>
                 </div>
               </Link>
@@ -1393,7 +1409,7 @@ export function PortfolioDashboard({
                         data-label="今日变化"
                       >
                         <span className="cash-cell__label">今日变化</span>
-                        <strong className="numeric position-cell__primary">—</strong>
+                        <strong className="numeric position-cell__primary">暂无</strong>
                         <span className="position-cell__secondary">不参与</span>
                       </div>
                     </Link>
@@ -1470,7 +1486,8 @@ export function PortfolioDashboard({
           内容可包含持仓、券商现金、成本、市值、盈亏和行情。操作会先写入系统剪贴板，再通过 ChatGPT 链接打开待发送 Prompt；本站与 Vercel 不接收这些资料，仍需你手动发送
         </p>
       </footer>
-      <BottomEntryAction brokerPortfolioActive={brokerPortfolioActive} />
+      </div>
+      </div>
 
       {moreSheetOpen ? (
         <div

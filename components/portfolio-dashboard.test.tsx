@@ -725,9 +725,9 @@ describe("PortfolioDashboard", () => {
     });
     expect(within(tesla).getByText("TSLA · 暂无价格")).toBeInTheDocument();
     expect(within(tesla).queryByText(/ET|隔夜|过期/)).not.toBeInTheDocument();
-    expect(screen.getByLabelText("今日收益 —，收益率 —")).toBeInTheDocument();
+    expect(screen.getByLabelText("今日收益 暂无，收益率 暂无")).toBeInTheDocument();
     expect(
-      screen.getByLabelText("今日盈亏估算 —，今日涨跌幅 —"),
+      screen.getByLabelText("今日盈亏估算 暂无，今日涨跌幅 暂无"),
     ).toBeInTheDocument();
     const pnlCell = tesla.querySelector<HTMLElement>(
       '[data-label="盈亏 / 收益率"]',
@@ -738,8 +738,7 @@ describe("PortfolioDashboard", () => {
       '[data-label="今日涨幅"]',
     );
     expect(dailyCell).not.toBeNull();
-    expect(within(dailyCell!).getByText("—")).toBeInTheDocument();
-    expect(within(dailyCell!).getByText("暂无")).toBeInTheDocument();
+    expect(within(dailyCell!).getAllByText("暂无")).toHaveLength(2);
   });
 
   it("shows a real empty state without manufacturing zero balances", () => {
