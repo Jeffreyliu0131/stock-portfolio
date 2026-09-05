@@ -25,3 +25,22 @@ describe("Buffett research deterministic calculations", () => {
     });
   });
 });
+
+describe("comparable financial periods", () => {
+  it("does not divide annual income by quarterly revenue sharing an end date", () => {
+    const evidence = aaplEvidenceForContract().map(item => item.metric === "REVENUE" ? { ...item, periodStart: "2025-07-01" } : item);
+    expect(calculateBuffettResearchMetrics(evidence).metrics.some(m => m.key === "NET_MARGIN")).toBe(false);
+  });
+  it("does not combine mismatched capex periods or restatement vintages", () => {
+    for (const patch of [{ periodStart: "2025-07-01" }, { filedAt: "2026-02-01" }]) {
+      const evidence = aaplEvidenceForContract().map(item => item.metric === "CAPITAL_EXPENDITURES" ? { ...item, ...patch } : item);
+      const result = calculateBuffettResearchMetrics(evidence);
+      expect(result.metrics.some(m => m.key === "FREE_CASH_FLOW_PROXY")).toBe(false);
+      expect(result.ownerEarnings.freeCashFlowProxyUsd).toBeNull();
+    }
+  });
+  it("does not derive a metric from a missing numerator", () => {
+    const result = calculateBuffettResearchMetrics(aaplEvidenceForContract().filter(e => e.metric !== "NET_INCOME"));
+    expect(result.metrics.some(m => m.key === "NET_MARGIN")).toBe(false);
+  });
+});

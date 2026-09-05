@@ -230,25 +230,6 @@ function filingEvidence(
   };
 }
 
-function concept(
-  facts: SecCompanyFactsResponse,
-  tags: readonly string[],
-): { readonly tag: string; readonly concept: SecFactConcept } | null {
-  const usGaap = facts.facts?.["us-gaap"];
-  if (usGaap === undefined) return null;
-  for (const tag of tags) {
-    const candidate = usGaap[tag];
-    if (
-      candidate !== undefined &&
-      Array.isArray(candidate.units?.USD) &&
-      candidate.units.USD.length > 0
-    ) {
-      return { tag, concept: candidate };
-    }
-  }
-  return null;
-}
-
 function validDate(value: unknown): value is string {
   return (
     typeof value === "string" &&
@@ -262,16 +243,18 @@ function selectedFact(
   tags: readonly string[],
   kind: "FLOW" | "INSTANT",
 ): SelectedFact | null {
-  const found = concept(facts, tags);
-  const entries = found?.concept.units?.USD;
-  if (found === null || !Array.isArray(entries)) return null;
-  const candidates = entries.flatMap((entry) => {
+  const candidates = tags.flatMap(tag => {
+    const found = { tag, concept: facts.facts?.["us-gaap"]?.[tag] };
+    const entries = found.concept?.units?.USD;
+    if (!found.concept || !Array.isArray(entries)) return [];
+    const label = typeof found.concept.label === "string" ? found.concept.label : tag;
+    return entries.flatMap((entry) => {
     if (
       typeof entry.val !== "number" ||
       !Number.isFinite(entry.val) ||
       typeof entry.accn !== "string" ||
       typeof entry.form !== "string" ||
-      typeof entry.filed !== "string" ||
+      !validDate(entry.filed) ||
       !validDate(entry.end) ||
       (kind === "FLOW" && !validDate(entry.start))
     ) {
@@ -279,24 +262,24 @@ function selectedFact(
     }
     if (
       kind === "FLOW" &&
-      (entry.form !== "10-K" || (entry.fp !== undefined && entry.fp !== "FY"))
+      ((entry.form !== "10-K" && entry.form !== "10-K/A") ||
+        (entry.fp !== undefined && entry.fp !== "FY") ||
+        (Date.parse(entry.end as string) - Date.parse(entry.start as string)) / 86_400_000 < 330 ||
+        (Date.parse(entry.end as string) - Date.parse(entry.start as string)) / 86_400_000 > 400)
     ) {
       return [];
     }
     if (
       kind === "INSTANT" &&
-      entry.form !== "10-K" &&
-      entry.form !== "10-Q"
+      entry.form !== "10-K" && entry.form !== "10-K/A" &&
+      entry.form !== "10-Q" && entry.form !== "10-Q/A"
     ) {
       return [];
     }
     return [
       {
         tag: found.tag,
-        label:
-          typeof found.concept.label === "string"
-            ? found.concept.label
-            : found.tag,
+        label,
         value: String(entry.val),
         accessionNumber: entry.accn,
         filedAt: entry.filed,
@@ -304,11 +287,14 @@ function selectedFact(
         periodEnd: entry.end,
       },
     ];
+    });
   });
   return (
     candidates.toSorted((left, right) => {
       const end = right.periodEnd.localeCompare(left.periodEnd);
-      return end !== 0 ? end : right.filedAt.localeCompare(left.filedAt);
+      return end || right.filedAt.localeCompare(left.filedAt)
+        || tags.indexOf(left.tag) - tags.indexOf(right.tag)
+        || right.accessionNumber.localeCompare(left.accessionNumber);
     })[0] ?? null
   );
 }

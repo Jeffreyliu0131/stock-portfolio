@@ -4,6 +4,10 @@ An iPhone-first portfolio PWA that keeps financial math deterministic, supports 
 
 The product records and values a portfolio; it does not place orders, recommend trades, promise real-time prices, or impersonate Warren Buffett. The advisor is a method simulation based on public value-investing principles and is not affiliated with Buffett or Berkshire Hathaway.
 
+## Primary review task
+
+Start with **understanding today's portfolio change**: inspect deterministic contribution, concentration and missing-data coverage in Portfolio analysis. Open consultation only for a follow-up question; issuer research is a separate, secondary workflow. This snapshot does not have a validated weekly performance history.
+
 ## Why this is an AI product
 
 The calculator already knows exact quantities, costs, cash, delayed valuations, P/L, concentration, and daily contribution. Those facts are deterministic. AI is used only where language and judgment help:
@@ -141,7 +145,7 @@ npm run build:next
 npm run bundle:check
 ```
 
-The current public snapshot passes 614 automated tests. The dedicated [Buffett research eval](evals/buffett-research/results/latest.md) passes 9/9 credential-free synthetic cases. That demonstrates reproducible contract behavior, not live retrieval freshness, citation entailment, investment performance, user adoption, model quality, or financial outcomes.
+The current public snapshot passes 618 automated tests. The dedicated [Buffett research eval](evals/buffett-research/results/latest.md) passes 9/9 credential-free synthetic cases. That demonstrates reproducible contract behavior, not live retrieval freshness, citation entailment, investment performance, user adoption, model quality, or financial outcomes.
 
 ## Architecture
 
@@ -181,3 +185,11 @@ This clean snapshot is derived from the full application while keeping private p
 ## License
 
 No open-source license is granted. The source is public for portfolio review and technical discussion; all rights are reserved.
+
+## Audit follow-through · 2026-09-05
+
+Annual SEC flow selection now excludes quarterly durations even when they appear in a 10-K/FY response, considers supported alternate tags, and selects the newest filing including amendments. Derived ratios and cash-flow proxies require matching period start/end, USD units, SEC-XBRL provenance and filing dates. Missing or incomparable inputs produce no derived metric. The SQL/source fixtures remain synthetic; no real retrieval or outcome is claimed.
+
+Next validation: give consenting adult reviewers a synthetic portfolio with an explainable daily move and one missing quote. Compare unaided interpretation with the deterministic analysis, then optional AI explanation. Record correct identification of the main contributor and missing-data limit, completion time, unsupported conclusions and whether AI changed understanding. Counterbalance task order; judge answers against the frozen portfolio calculation, not another model. Recruitment, live API use and external results remain pending.
+
+Local verification on 2026-09-05: 618 tests, 9 synthetic research eval cases, typecheck, domain build, Next.js reference build, client-bundle and public-snapshot checks passed. No production deployment or real provider evaluation was performed.

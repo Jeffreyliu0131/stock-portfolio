@@ -50,6 +50,16 @@ function evidenceFor(
   );
 }
 
+function comparableAnnualFacts(left: BuffettEvidenceItem, right: BuffettEvidenceItem): boolean {
+  if (left.sourceType !== "SEC_XBRL" || right.sourceType !== "SEC_XBRL" ||
+      left.unit !== "USD" || right.unit !== "USD" ||
+      !left.periodStart || left.periodStart !== right.periodStart ||
+      !left.periodEnd || left.periodEnd !== right.periodEnd ||
+      !left.filedAt || left.filedAt !== right.filedAt) return false;
+  const days = (Date.parse(left.periodEnd) - Date.parse(left.periodStart)) / 86_400_000;
+  return days >= 330 && days <= 400;
+}
+
 export interface BuffettResearchCalculations {
   readonly metrics: readonly BuffettResearchMetric[];
   readonly ownerEarnings: BuffettOwnerEarningsAssessment;
@@ -70,7 +80,7 @@ export function calculateBuffettResearchMetrics(
     revenue !== null &&
     netIncome !== null &&
     revenue.periodEnd !== null &&
-    revenue.periodEnd === netIncome.periodEnd &&
+    comparableAnnualFacts(revenue, netIncome) &&
     revenue.value !== null &&
     netIncome.value !== null &&
     !new Decimal(revenue.value).isZero()
@@ -94,7 +104,7 @@ export function calculateBuffettResearchMetrics(
     operatingCashFlow !== null &&
     capitalExpenditures !== null &&
     operatingCashFlow.periodEnd !== null &&
-    operatingCashFlow.periodEnd === capitalExpenditures.periodEnd &&
+    comparableAnnualFacts(operatingCashFlow, capitalExpenditures) &&
     operatingCashFlow.value !== null &&
     capitalExpenditures.value !== null
   ) {

@@ -1153,3 +1153,9 @@ body:has(.portfolio-account) {
   from { opacity: 0; transform: translateY(0.7rem); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* The primary job is understanding the current portfolio; research is secondary. */
+.portfolio-account .portfolio-ai-entry__context { grid-column: 1 / -1; margin: 0 0 0.3rem; color: var(--ledger-ink); font-size: 0.82rem; line-height: 1.6; }
+.portfolio-account .portfolio-ai-entry__button--primary { grid-column: 1 / -1; background: var(--ledger-ink); color: var(--ledger-surface-raised); }
+.portfolio-account .portfolio-ai-entry__button--chat,
+.portfolio-account .portfolio-ai-entry__button--research { grid-column: auto; background: var(--ledger-surface-raised); color: var(--ledger-ink); border-color: var(--ledger-line-strong); }

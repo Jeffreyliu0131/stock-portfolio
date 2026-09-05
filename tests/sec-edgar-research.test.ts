@@ -77,3 +77,16 @@ describe("SEC EDGAR research adapter", () => {
     ).rejects.toMatchObject({ code: "INVALID_SEC_RESPONSE" });
   });
 });
+
+describe("annual SEC selection", () => {
+  it("rejects quarter facts inside 10-K/FY and chooses the most recently filed annual fact", async () => {
+    const facts = syntheticSecCompanyFacts();
+    const entries = facts.facts["us-gaap"].RevenueFromContractWithCustomerExcludingAssessedTax.units.USD;
+    const annual = entries[0]!;
+    entries.unshift({ ...annual, start: "2025-07-01", val: 99 });
+    entries.push({ ...annual, filed: "2026-02-01", val: 420_000_000_000, form: "10-K/A" });
+    const result = await researchIssuerWithSec(buffettResearchIssuer("AAPL"), { userAgent: "synthetic-audit", retrievedAt: RESEARCH_NOW }, new AbortController().signal,
+      async input => Response.json(String(input).includes("companyfacts") ? facts : syntheticSecSubmissions()));
+    expect(result.evidence.find(e => e.metric === "REVENUE")).toMatchObject({ value: "420000000000", periodStart: "2024-09-29", filedAt: "2026-02-01" });
+  });
+});

@@ -110,3 +110,7 @@ Primary references:
 - OpenAI Structured Outputs: <https://developers.openai.com/api/docs/guides/structured-outputs>
 - SEC EDGAR APIs: <https://www.sec.gov/search-filings/edgar-application-programming-interfaces>
 - Berkshire 1986 shareholder letter: <https://www.berkshirehathaway.com/letters/1986.html>
+
+## Financial-period gate · 2026-09-05
+
+Flow observations require an annual duration of 330–400 days (including 52/53-week years); transition or irregular periods abstain. Candidate tags compete by period end, filing date, then tag preference. Amendments are eligible; net margin and FCF proxy require equal start/end, USD units and filing date. An updated numerator with an older denominator is an evidence gap. This intentionally favors omission over silently mixing vintages.

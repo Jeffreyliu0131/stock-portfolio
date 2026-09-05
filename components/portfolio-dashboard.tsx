@@ -1069,8 +1069,9 @@ export function PortfolioDashboard({
 
       {insights !== null ? (
         <section className="portfolio-ai-entry" aria-label="组合工具">
+          <p className="portfolio-ai-entry__context">先理解今日组合变化：查看贡献、集中度与缺失数据，再决定是否需要进一步提问。</p>
           <button
-            className="portfolio-ai-entry__button"
+            className="portfolio-ai-entry__button portfolio-ai-entry__button--primary"
             ref={insightsTrigger}
             type="button"
             onClick={() => setInsightsSheetOpen(true)}
