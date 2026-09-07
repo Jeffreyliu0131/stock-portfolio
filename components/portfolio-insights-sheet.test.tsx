@@ -269,6 +269,9 @@ describe("PortfolioInsightsSheet", () => {
       />,
     );
 
+    expect(screen.getByLabelText("今日变化摘要")).toHaveTextContent("AAPL +$9.00");
+    expect(screen.getByLabelText("今日变化摘要")).toHaveTextContent("MSFT −$3.00");
+    expect(document.getElementById("daily-contribution-title")!.compareDocumentPosition(document.getElementById("structure-title")!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     const dialog = screen.getByRole("dialog", {
       name: "组合分析",
     });
@@ -400,6 +403,7 @@ describe("PortfolioInsightsSheet", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("覆盖 1/3 只 · 部分口径")).toBeInTheDocument();
+    expect(screen.getByLabelText("今日变化摘要")).toHaveTextContent("不能据此判断完整组合净变化");
     expect(
       screen.getByText("组合净贡献").parentElement,
     ).toHaveTextContent("—需全部股票可计算");

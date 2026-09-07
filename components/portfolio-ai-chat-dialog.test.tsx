@@ -244,6 +244,7 @@ describe("PortfolioAiChatDialog", () => {
         onClose={onClose}
       />,
     );
+    expect(screen.getByRole("status")).toHaveTextContent("当前数据已变化");
     fireEvent.change(screen.getByPlaceholderText("直接问：这个判断的证据够吗？"), {
       target: { value: "再说说现金的作用。" },
     });

@@ -24,7 +24,7 @@ The model never becomes the source of truth for a price, weight, return, or port
 
 The home screen keeps three separate tools:
 
-- **Portfolio analysis** produces a six-dimension, evidence-linked snapshot review and AI-inferred instrument/sector classification.
+- **Portfolio analysis** opens with deterministic daily contribution and coverage, followed by structure. It makes no model request until **开始 AI 解读** is selected; that optional action produces the six-dimension review and AI-inferred classification.
 - **Buffett framework advisor** opens with the input focused and makes no request until the user sends a question.
 - **Buffett research system** sends only an AAPL/MSFT symbol and question, retrieves SEC/XBRL and official-domain Web Search evidence, runs deterministic calculations, and shows the answer beside sources, unknowns, counter-evidence, and a research trace.
 
@@ -88,7 +88,7 @@ This distinction is intentional: a Buffett-style vocabulary without the required
 
 The public snapshot contains synthetic data only. It contains no holdings, broker exports, account identifiers, portfolio backups, real-balance screenshots, emails, API keys, deployment account IDs, production origins, or database bindings.
 
-Runtime behavior is different and is disclosed in the advisor: sending a question transmits the current USD portfolio snapshot—symbols, names, quantities, costs, valuations, P/L, cash, and quote metadata—through the operator's server to the configured model provider. It excludes names, emails, broker account identifiers, device identifiers, history databases, backups, drafts, clipboard data, and internal storage metadata. Closing the dialog clears the in-memory conversation.
+Runtime behavior is disclosed before starting AI: selecting AI interpretation or sending an advisor question transmits the current USD portfolio snapshot—symbols, names, quantities, costs, valuations, P/L, cash, and quote metadata—through the operator's server to the configured model provider. It excludes names, emails, broker account identifiers, device identifiers, history databases, backups, drafts, clipboard data, and internal storage metadata. Closing the dialog clears the in-memory conversation.
 
 The separate research system has a narrower boundary: it sends only the selected AAPL/MSFT symbol and research question to OpenAI Web Search. SEC retrieval and deterministic calculations run server-side; no holding quantity, cost basis, cash, or account state enters the research request.
 
@@ -193,3 +193,9 @@ Annual SEC flow selection now excludes quarterly durations even when they appear
 Next validation: give consenting adult reviewers a synthetic portfolio with an explainable daily move and one missing quote. Compare unaided interpretation with the deterministic analysis, then optional AI explanation. Record correct identification of the main contributor and missing-data limit, completion time, unsupported conclusions and whether AI changed understanding. Counterbalance task order; judge answers against the frozen portfolio calculation, not another model. Recruitment, live API use and external results remain pending.
 
 Local verification on 2026-09-05: 618 tests, 9 synthetic research eval cases, typecheck, domain build, Next.js reference build, client-bundle and public-snapshot checks passed. No production deployment or real provider evaluation was performed.
+
+## Review iteration · 2026-09-07
+
+Daily contribution leads: the largest known positive and negative contributors use existing exact Decimal results, with offset and missing-coverage explanations. AI interpretation starts only on request, captures the data at that moment, and labels its snapshot time separately from quote time. A data refresh leaves prior interpretation intact and offers an explicit current-data rerun; no automatic second request. Chat keeps its first-question snapshot and explains how to start afresh.
+
+Local verification: `npm run verify` passed (619 tests, including synthetic research cases), reference Next.js build and client bundle audit passed. The isolated real component/CSS render at 390 px places daily contribution first without page overflow; interactions are covered by component tests, not a live-provider or full-app field study. No model call, real portfolio data, site deployment, historical returns or trade advice added.

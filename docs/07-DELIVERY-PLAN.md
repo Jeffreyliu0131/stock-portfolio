@@ -1,5 +1,9 @@
 # 交付计划
 
+> 2026-09-07 公开展示仓当前覆盖规则：本轮改动将组合分析改为“今日贡献 → 组合结构 → 可选 AI 解读”。本节替代下文历史版本的“打开组合分析即调用 AI”行为；不修改独立 production 仓或部署。
+> 验收：打开分析零模型请求，正负贡献来自现有 Decimal 结果并标明缺价子集；用户点击“开始 AI 解读”时才截取数据并发送。后台刷新不替换已生成解读；数据变化给出提示，重新解读由用户主动发起并使用最新快照。聊天继续固定首问快照，明确截取时间不是行情时间，以及关闭重开才能使用最新数据。失败时保留确定性内容，重试只由用户触发。
+
+
 状态：Active  
 最后更新：2026-08-22（Sites/Vercel 双运行时同步）
 
@@ -363,3 +367,7 @@ P0 不注册 Service Worker，也不承诺完整离线打开或离线编辑。�
 - Sites source commit/saved version/private deployment 与 Vercel provider `main` commit/Ready deployment 均能各自对应生产 smoke。
 
 当前 Sites、D1、Vercel、Alpaca 与 DeepSeek 运行资源已建立，但每次源提交/推送和 Production 发布都以用户对当前变更的明确授权为准。DeepSeek 账号充值或购买、新增数据库、扩大账号范围、其他云资源或导入真实资产仍需用户明确授权。
+
+## 2026-09-07 公开仓迭代验证
+
+本轮 `npm run verify`（619 tests）、`build:next`、`bundle:check` 通过；390px 实际组件/样式隔离渲染无页面横向溢出、今日贡献在首位。交互由组件测试验证；未调用真实模型、读取真实持仓、运行线上研究或部署。当前实现与 README 一致，GitHub 发布待当前审批完成。

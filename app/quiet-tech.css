@@ -2609,7 +2609,8 @@ body:has(.portfolio-terminal) {
   background: transparent;
 }
 
-.portfolio-ai-analysis-error button {
+.portfolio-ai-analysis-error button,
+.portfolio-ai-action {
   min-width: 4rem;
   min-height: 2.35rem;
   padding: 0.4rem 0.65rem;

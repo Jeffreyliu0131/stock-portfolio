@@ -121,7 +121,7 @@ afterEach(() => {
 });
 
 describe("PortfolioAiConsultationPanel", () => {
-  it("starts the analysis directly, sends full context, and renders local exposure totals", async () => {
+  it("waits for an explicit start, sends full context, and renders local exposure totals", async () => {
     const currentSource = source();
     const fetchMock = vi.fn(async (_input: string, init: RequestInit) => {
       const request = JSON.parse(String(init.body)) as {
@@ -165,7 +165,9 @@ describe("PortfolioAiConsultationPanel", () => {
       />,
     );
 
-    expect(screen.getByRole("status")).toHaveTextContent("分析中");
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(screen.getByText(/开始后，当前持仓/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "开始 AI 解读" }));
     await screen.findByText(initialPortfolioConsultationOutput().brief!.headline);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const sectorSection = document.getElementById("ai-sector-title")?.closest("section");
@@ -198,6 +200,7 @@ describe("PortfolioAiConsultationPanel", () => {
       />,
     );
 
+    fireEvent.click(screen.getByRole("button", { name: "开始 AI 解读" }));
     await screen.findByText(initialPortfolioConsultationOutput().brief!.headline);
     expect(screen.getAllByText(/总资产 ¥28,800\.00/)).not.toHaveLength(0);
     expect(screen.getAllByText(/USD 现金 ¥7,200\.00 · 25\.00%/)).not.toHaveLength(0);
@@ -229,6 +232,7 @@ describe("PortfolioAiConsultationPanel", () => {
       />,
     );
 
+    fireEvent.click(screen.getByRole("button", { name: "开始 AI 解读" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("AI 分析暂时不可用");
     expect(screen.queryByText("建议卖出最大持仓来降低风险。")).not.toBeInTheDocument();
     expect(screen.queryByText("持仓没有被修改")).not.toBeInTheDocument();
@@ -260,6 +264,7 @@ describe("PortfolioAiConsultationPanel", () => {
         usdCnyRate={null}
       />,
     );
+    fireEvent.click(screen.getByRole("button", { name: "开始 AI 解读" }));
     await screen.findByText(initialPortfolioConsultationOutput().brief!.headline);
 
     rerender(
@@ -272,5 +277,25 @@ describe("PortfolioAiConsultationPanel", () => {
     );
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     expect(sentMarketValue).toBe("2000");
+    expect(screen.getByRole("status")).toHaveTextContent("当前数据已变化");
+    fireEvent.click(screen.getByRole("button", { name: "用当前数据重新解读" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(sentMarketValue).toBe("2500");
   });
+  it("uses data refreshed before the first explicit start without any earlier request", async () => {
+    const initial = source();
+    const latest = source("250");
+    const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
+      expect(JSON.parse(String(init.body)).portfolio.positions[0].marketValueUsd).toBe("2500");
+      return new Response(JSON.stringify(successResponse()), {status: 200});
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { rerender } = render(<PortfolioAiConsultationPanel insights={createPortfolioInsights(initial)} portfolioSource={initial} displayCurrency="USD" usdCnyRate={null} />);
+    rerender(<PortfolioAiConsultationPanel insights={createPortfolioInsights(latest)} portfolioSource={latest} displayCurrency="USD" usdCnyRate={null} />);
+    expect(fetchMock).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", {name: "开始 AI 解读"}));
+    await screen.findByText(initialPortfolioConsultationOutput().brief!.headline);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
 });

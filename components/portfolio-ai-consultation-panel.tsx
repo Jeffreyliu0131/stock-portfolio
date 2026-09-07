@@ -37,9 +37,11 @@ interface PortfolioAnalysisSession {
   readonly request: PortfolioConsultationRequest;
   readonly result: PortfolioConsultationSuccess;
   readonly usdCnyRateAtStart: string | null;
+  readonly sourceFingerprint: string;
 }
 
 type PortfolioAnalysisState =
+  | { readonly kind: "idle" }
   | { readonly kind: "loading" }
   | { readonly kind: "error"; readonly message: string }
   | { readonly kind: "ready"; readonly session: PortfolioAnalysisSession };
@@ -121,13 +123,13 @@ export function PortfolioAiConsultationPanel({
   usdCnyRate,
 }: PortfolioAiConsultationPanelProps) {
   const generation = useRef(0);
-  const sourceAtStart = useRef(portfolioSource);
-  const insightsAtStart = useRef(insights);
-  const usdCnyRateAtStart = useRef(usdCnyRate);
-  const [state, setState] = useState<PortfolioAnalysisState>({ kind: "loading" });
+  const current = useRef({ portfolioSource, insights, usdCnyRate });
+  current.current = { portfolioSource, insights, usdCnyRate };
+  const [state, setState] = useState<PortfolioAnalysisState>({ kind: "idle" });
 
   const startAnalysis = useCallback(async () => {
-    const source = sourceAtStart.current;
+    const { portfolioSource: source, insights: currentInsights, usdCnyRate: rate } = current.current;
+    const sourceFingerprint = JSON.stringify({ source, insights: currentInsights, rate });
     if (source === null) {
       setState({ kind: "error", message: "当前组合暂不可用。" });
       return;
@@ -139,7 +141,7 @@ export function PortfolioAiConsultationPanel({
     try {
       request = createPortfolioConsultationRequest(
         source,
-        insightsAtStart.current,
+        currentInsights,
         { mode: "INITIAL_ANALYSIS" },
       );
     } catch {
@@ -156,9 +158,12 @@ export function PortfolioAiConsultationPanel({
           session: {
             request,
             result,
-            usdCnyRateAtStart: usdCnyRateAtStart.current,
+            usdCnyRateAtStart: rate,
+            sourceFingerprint,
           },
         });
+      } else if (generation.current === currentGeneration) {
+        setState({ kind: "error", message: "AI 分析暂时不可用。" });
       }
     } catch (error) {
       if (generation.current === currentGeneration) {
@@ -168,11 +173,10 @@ export function PortfolioAiConsultationPanel({
   }, []);
 
   useEffect(() => {
-    void startAnalysis();
     return () => {
       generation.current += 1;
     };
-  }, [startAnalysis]);
+  }, []);
 
   const presentation = useMemo(() => {
     if (state.kind !== "ready") {
@@ -272,6 +276,14 @@ export function PortfolioAiConsultationPanel({
     return { exposures, classificationById, evidenceLabel };
   }, [displayCurrency, state]);
 
+  if (state.kind === "idle") {
+    return <section className="insight-section insight-section--ai" aria-label="AI 组合体检">
+      <h3>需要进一步解释？</h3>
+      <p>AI 可补充行业分类和组合解读。开始后，当前持仓、数量、成本、估值、盈亏、现金与行情元数据会经服务端发送给配置的模型；不发送身份、券商账号、历史库或备份。</p>
+      <button className="portfolio-ai-action" type="button" onClick={() => void startAnalysis()}>开始 AI 解读</button>
+    </section>;
+  }
+
   if (state.kind === "loading") {
     return (
       <section className="insight-section insight-section--ai" aria-label="AI 组合体检">
@@ -288,7 +300,7 @@ export function PortfolioAiConsultationPanel({
       <section className="insight-section insight-section--ai" aria-label="AI 组合体检">
         <div className="portfolio-ai-analysis-error">
           <p className="portfolio-ai-error" role="alert">{state.message}</p>
-          <button type="button" onClick={() => void startAnalysis()}>
+          <button className="portfolio-ai-action" type="button" onClick={() => void startAnalysis()}>
             重试
           </button>
         </div>
@@ -310,6 +322,9 @@ export function PortfolioAiConsultationPanel({
       <div className="portfolio-ai-result portfolio-ai-consultation">
         <div className="portfolio-ai-result__headline">
           <span>AI 体检</span>
+          <p>分析快照：{new Date(state.session.request.generatedAt).toLocaleString("zh-CN")}（截取时间，非行情时间）。</p>
+          <p role="status">{state.session.sourceFingerprint !== JSON.stringify({ source: portfolioSource, insights, rate: usdCnyRate }) ? "当前数据已变化；下方仍基于上次快照。" : "本次解读固定使用开始时的快照。"}</p>
+          <button className="portfolio-ai-action" type="button" onClick={() => void startAnalysis()}>用当前数据重新解读</button>
           <h3 id="portfolio-ai-title">{brief.headline}</h3>
           <p>{brief.summary}</p>
         </div>

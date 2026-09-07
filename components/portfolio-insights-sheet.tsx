@@ -428,14 +428,200 @@ export function PortfolioInsightsSheet({
             </p>
           ) : null}
 
-          {portfolioSource !== null ? (
-            <PortfolioAiConsultationPanel
-              insights={insights}
-              portfolioSource={portfolioSource}
-              displayCurrency={displayCurrency}
-              usdCnyRate={usdCnyRate}
-            />
-          ) : null}
+          <section className="insight-section insight-section--daily" aria-labelledby="daily-contribution-title">
+            <div className="insight-section__heading">
+              <h3 id="daily-contribution-title">今日贡献</h3>
+              <span>单位：{displayCurrencyLabel}</span>
+            </div>
+            <p
+              className="insight-coverage insight-coverage--daily"
+              data-status={daily.status.toLowerCase()}
+            >
+              {dailyCoverage}
+            </p>
+
+            <div className="insight-basis-note" aria-label="今日变化摘要">
+              <p>{daily.status === "UNAVAILABLE" ? "数据不足，暂不能解释今天的组合变化。" : daily.status === "PARTIAL" ? `以下仅说明可计算的 ${daily.calculablePositionCount} 只持仓；${daily.totalPositionCount - daily.calculablePositionCount} 只缺少数据，不能据此判断完整组合净变化。` : "按当前持仓数量估算今天的变化："}</p>
+              {daily.status !== "UNAVAILABLE" ? <>
+                <p>最大已知正贡献：{daily.largestPositiveContributor ? `${daily.largestPositiveContributor.symbol} ${signedDisplayAmount(daily.largestPositiveContributor.amountUsd, displayCurrency, usdCnyRate)}` : "可计算持仓中暂无"}；最大已知负贡献：{daily.largestNegativeContributor ? `${daily.largestNegativeContributor.symbol} ${signedDisplayAmount(daily.largestNegativeContributor.amountUsd, displayCurrency, usdCnyRate)}` : "可计算持仓中暂无"}。</p>
+                {daily.largestPositiveContributor && daily.largestNegativeContributor ? <p>正负贡献相互抵消，净额不能代表每只持仓的变化幅度。</p> : null}
+              </> : null}
+            </div>
+            <dl className="daily-summary">
+              <div>
+                <dt>组合净贡献</dt>
+                <dd
+                  className={`numeric insight-tone--${amountTone(
+                    daily.netEffectUsd,
+                  )}`}
+                >
+                  {daily.status === "COMPLETE"
+                    ? signedDisplayAmount(
+                        daily.netEffectUsd,
+                        displayCurrency,
+                        usdCnyRate,
+                      )
+                    : "—"}
+                </dd>
+                {daily.status === "COMPLETE" ? null : (
+                  <small>需全部股票可计算</small>
+                )}
+              </div>
+              <div>
+                <dt>
+                  {daily.status === "PARTIAL" ? "子集涨跌贡献" : "涨跌贡献比例"}
+                </dt>
+                <dd className="daily-summary__split numeric">
+                  <span className="insight-tone--positive">
+                    {percent(dailyChart.positiveShare, 1)}
+                  </span>
+                  <span aria-hidden="true">/</span>
+                  <span className="insight-tone--negative">
+                    {percent(dailyChart.negativeShare, 1)}
+                  </span>
+                </dd>
+              </div>
+            </dl>
+
+            {dailyChart.hasDirectionalScale ? (
+              <figure
+                className="daily-chart"
+                role="img"
+                aria-labelledby="daily-chart-caption"
+              >
+                <div className="daily-chart__head" aria-hidden="true">
+                  <span>标的</span>
+                  <span>贡献幅度</span>
+                  <span>贡献</span>
+                </div>
+                <div className="daily-chart__matrix" aria-hidden="true">
+                  <div className="daily-chart__identities">
+                    {contributionRows.map((row) => (
+                      <div key={row.instrumentKey}>
+                        <strong>{row.symbol}</strong>
+                        <span>{row.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="daily-chart__plot">
+                    <BarChart
+                      responsive
+                      accessibilityLayer={false}
+                      data={dailyChart.rows}
+                      layout="vertical"
+                      barCategoryGap="32%"
+                      margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                      style={{ width: "100%", height: chartHeight }}
+                    >
+                      <CartesianGrid
+                        horizontal={false}
+                        stroke="#e3e7ed"
+                        strokeDasharray="2 5"
+                      />
+                      <XAxis
+                        type="number"
+                        domain={[-1, 1]}
+                        ticks={[-1, -0.5, 0, 0.5, 1]}
+                        hide
+                      />
+                      <YAxis type="category" dataKey="symbol" hide />
+                      <ReferenceLine x={0} stroke="#9aa4b2" strokeWidth={1.2} />
+                      <Bar dataKey="normalized" barSize={14} isAnimationActive={false}>
+                        {dailyChart.rows.map((row) => (
+                          <Cell key={row.instrumentKey} fill={row.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </div>
+                  <div className="daily-chart__metrics">
+                    {contributionRows.map((row) => (
+                      <div key={row.instrumentKey}>
+                        <strong
+                          className={`numeric insight-tone--${amountTone(
+                            row.amountUsd,
+                          )}`}
+                        >
+                          {signedDisplayAmount(
+                            row.amountUsd,
+                            displayCurrency,
+                            usdCnyRate,
+                          )}
+                        </strong>
+                        <span className="numeric">
+                          {row.amountUsd === null
+                            ? dailyUnavailableLabel(row)
+                            : row.absoluteContributionShare === null
+                              ? "占比不适用"
+                              : percent(row.absoluteContributionShare)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="daily-chart__axis" aria-hidden="true">
+                  <div>
+                    <span>
+                      −{displayAmount(
+                        dailyChart.maxAbsoluteUsd,
+                        displayCurrency,
+                        usdCnyRate,
+                      )}
+                    </span>
+                    <span>0</span>
+                    <span>
+                      +{displayAmount(
+                        dailyChart.maxAbsoluteUsd,
+                        displayCurrency,
+                        usdCnyRate,
+                      )}
+                    </span>
+                  </div>
+                </div>
+                <div className="daily-chart__legend" aria-hidden="true">
+                  <span><i data-tone="negative" />负贡献</span>
+                  <span><i data-tone="positive" />正贡献</span>
+                </div>
+                <figcaption id="daily-chart-caption" className="sr-only">
+                  今日贡献零轴图。{contributionRows
+                    .filter((row) => row.amountUsd !== null)
+                    .map(
+                      (row) =>
+                        `${row.symbol} ${signedDisplayAmount(
+                          row.amountUsd,
+                          displayCurrency,
+                          usdCnyRate,
+                        )}，绝对贡献 ${percent(
+                          row.absoluteContributionShare,
+                        )}`,
+                    )
+                    .join("；")}
+                </figcaption>
+              </figure>
+            ) : (
+              <div className="insight-empty-state insight-empty-state--daily">
+                <strong>
+                  {daily.shareBasis === "ZERO_ABSOLUTE_EFFECT"
+                    ? "今日绝对变化为 0"
+                    : "今日贡献暂不可用"}
+                </strong>
+                <p>
+                  {daily.shareBasis === "ZERO_ABSOLUTE_EFFECT"
+                    ? "净额仍可为 0，但没有可分配的绝对贡献占比。"
+                    : "当前没有股票同时具备估值价与前一常规收盘价。"}
+                </p>
+              </div>
+            )}
+
+            {contributionList(
+              contributionRows,
+              displayCurrency,
+              usdCnyRate,
+              dailyChart.hasDirectionalScale,
+            )}
+            <p className="insight-basis-note insight-basis-note--method">
+              估值基于当前数量 ×（估值价 − 前一常规收盘价），可能与今日交易口径的实际盈亏不同。绝对贡献占比使用可计算股票的绝对变化总量，现金不参与。
+            </p>
+          </section>
 
           <section className="insight-section insight-section--structure" aria-labelledby="structure-title">
             <div className="insight-section__heading">
@@ -637,193 +823,15 @@ export function PortfolioInsightsSheet({
             </dl>
           </section>
 
-          <section className="insight-section insight-section--daily" aria-labelledby="daily-contribution-title">
-            <div className="insight-section__heading">
-              <h3 id="daily-contribution-title">今日贡献</h3>
-              <span>单位：{displayCurrencyLabel}</span>
-            </div>
-            <p
-              className="insight-coverage insight-coverage--daily"
-              data-status={daily.status.toLowerCase()}
-            >
-              {dailyCoverage}
-            </p>
+          {portfolioSource !== null ? (
+            <PortfolioAiConsultationPanel
+              insights={insights}
+              portfolioSource={portfolioSource}
+              displayCurrency={displayCurrency}
+              usdCnyRate={usdCnyRate}
+            />
+          ) : null}
 
-            <dl className="daily-summary">
-              <div>
-                <dt>组合净贡献</dt>
-                <dd
-                  className={`numeric insight-tone--${amountTone(
-                    daily.netEffectUsd,
-                  )}`}
-                >
-                  {daily.status === "COMPLETE"
-                    ? signedDisplayAmount(
-                        daily.netEffectUsd,
-                        displayCurrency,
-                        usdCnyRate,
-                      )
-                    : "—"}
-                </dd>
-                {daily.status === "COMPLETE" ? null : (
-                  <small>需全部股票可计算</small>
-                )}
-              </div>
-              <div>
-                <dt>
-                  {daily.status === "PARTIAL" ? "子集涨跌贡献" : "涨跌贡献比例"}
-                </dt>
-                <dd className="daily-summary__split numeric">
-                  <span className="insight-tone--positive">
-                    {percent(dailyChart.positiveShare, 1)}
-                  </span>
-                  <span aria-hidden="true">/</span>
-                  <span className="insight-tone--negative">
-                    {percent(dailyChart.negativeShare, 1)}
-                  </span>
-                </dd>
-              </div>
-            </dl>
-
-            {dailyChart.hasDirectionalScale ? (
-              <figure
-                className="daily-chart"
-                role="img"
-                aria-labelledby="daily-chart-caption"
-              >
-                <div className="daily-chart__head" aria-hidden="true">
-                  <span>标的</span>
-                  <span>贡献幅度</span>
-                  <span>贡献</span>
-                </div>
-                <div className="daily-chart__matrix" aria-hidden="true">
-                  <div className="daily-chart__identities">
-                    {contributionRows.map((row) => (
-                      <div key={row.instrumentKey}>
-                        <strong>{row.symbol}</strong>
-                        <span>{row.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="daily-chart__plot">
-                    <BarChart
-                      responsive
-                      accessibilityLayer={false}
-                      data={dailyChart.rows}
-                      layout="vertical"
-                      barCategoryGap="32%"
-                      margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-                      style={{ width: "100%", height: chartHeight }}
-                    >
-                      <CartesianGrid
-                        horizontal={false}
-                        stroke="#e3e7ed"
-                        strokeDasharray="2 5"
-                      />
-                      <XAxis
-                        type="number"
-                        domain={[-1, 1]}
-                        ticks={[-1, -0.5, 0, 0.5, 1]}
-                        hide
-                      />
-                      <YAxis type="category" dataKey="symbol" hide />
-                      <ReferenceLine x={0} stroke="#9aa4b2" strokeWidth={1.2} />
-                      <Bar dataKey="normalized" barSize={14} isAnimationActive={false}>
-                        {dailyChart.rows.map((row) => (
-                          <Cell key={row.instrumentKey} fill={row.color} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </div>
-                  <div className="daily-chart__metrics">
-                    {contributionRows.map((row) => (
-                      <div key={row.instrumentKey}>
-                        <strong
-                          className={`numeric insight-tone--${amountTone(
-                            row.amountUsd,
-                          )}`}
-                        >
-                          {signedDisplayAmount(
-                            row.amountUsd,
-                            displayCurrency,
-                            usdCnyRate,
-                          )}
-                        </strong>
-                        <span className="numeric">
-                          {row.amountUsd === null
-                            ? dailyUnavailableLabel(row)
-                            : row.absoluteContributionShare === null
-                              ? "占比不适用"
-                              : percent(row.absoluteContributionShare)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="daily-chart__axis" aria-hidden="true">
-                  <div>
-                    <span>
-                      −{displayAmount(
-                        dailyChart.maxAbsoluteUsd,
-                        displayCurrency,
-                        usdCnyRate,
-                      )}
-                    </span>
-                    <span>0</span>
-                    <span>
-                      +{displayAmount(
-                        dailyChart.maxAbsoluteUsd,
-                        displayCurrency,
-                        usdCnyRate,
-                      )}
-                    </span>
-                  </div>
-                </div>
-                <div className="daily-chart__legend" aria-hidden="true">
-                  <span><i data-tone="negative" />负贡献</span>
-                  <span><i data-tone="positive" />正贡献</span>
-                </div>
-                <figcaption id="daily-chart-caption" className="sr-only">
-                  今日贡献零轴图。{contributionRows
-                    .filter((row) => row.amountUsd !== null)
-                    .map(
-                      (row) =>
-                        `${row.symbol} ${signedDisplayAmount(
-                          row.amountUsd,
-                          displayCurrency,
-                          usdCnyRate,
-                        )}，绝对贡献 ${percent(
-                          row.absoluteContributionShare,
-                        )}`,
-                    )
-                    .join("；")}
-                </figcaption>
-              </figure>
-            ) : (
-              <div className="insight-empty-state insight-empty-state--daily">
-                <strong>
-                  {daily.shareBasis === "ZERO_ABSOLUTE_EFFECT"
-                    ? "今日绝对变化为 0"
-                    : "今日贡献暂不可用"}
-                </strong>
-                <p>
-                  {daily.shareBasis === "ZERO_ABSOLUTE_EFFECT"
-                    ? "净额仍可为 0，但没有可分配的绝对贡献占比。"
-                    : "当前没有股票同时具备估值价与前一常规收盘价。"}
-                </p>
-              </div>
-            )}
-
-            {contributionList(
-              contributionRows,
-              displayCurrency,
-              usdCnyRate,
-              dailyChart.hasDirectionalScale,
-            )}
-            <p className="insight-basis-note insight-basis-note--method">
-              估值基于当前数量 ×（估值价 − 前一常规收盘价），可能与今日交易口径的实际盈亏不同。绝对贡献占比使用可计算股票的绝对变化总量，现金不参与。
-            </p>
-          </section>
         </div>
       </section>
     </div>

@@ -112,6 +112,7 @@ export function PortfolioAiChatDialog({
   const messageList = useRef<HTMLDivElement | null>(null);
   const initialRequest = useRef<PortfolioConsultationRequest | null>(null);
   const usdCnyRateAtStart = useRef<string | null>(null);
+  const sourceFingerprintAtStart = useRef<string | null>(null);
   const generation = useRef(0);
   const messageSequence = useRef(0);
   const [messages, setMessages] = useState<readonly PortfolioChatMessage[]>([]);
@@ -253,6 +254,7 @@ export function PortfolioAiChatDialog({
             },
           );
           initialRequest.current = request;
+          sourceFingerprintAtStart.current = JSON.stringify({ portfolioSource, insights, usdCnyRate });
           usdCnyRateAtStart.current = usdCnyRate;
         } else {
           request = createPortfolioConsultationChatTurnRequest(
@@ -357,6 +359,11 @@ export function PortfolioAiChatDialog({
           </button>
         </header>
 
+        {initialRequest.current !== null ? <p className="insight-basis-note" role="status">
+          对话快照：{new Date(initialRequest.current.generatedAt).toLocaleString("zh-CN")}（非行情时间）。
+          {sourceFingerprintAtStart.current !== JSON.stringify({ portfolioSource, insights, usdCnyRate }) ? "当前数据已变化，本次对话仍使用原快照。" : "后续问题沿用这份快照。"}
+          需要最新数据时，关闭后重新打开并发送问题。
+        </p> : null}
         <div
           className="portfolio-ai-chat-dialog__messages"
           ref={messageList}
