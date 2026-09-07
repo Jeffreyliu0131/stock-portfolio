@@ -9,7 +9,9 @@ status: accepted
 
 ## Status
 
-Accepted
+Accepted; partially superseded for the public snapshot on 2026-09-07.
+
+本 ADR 的独立入口、数据与会话隔离继续适用；“打开分析即调用模型”“不展示发送边界/快照”“无重新体检”的历史决定已被当前 [PRD FR-14](../01-PRD.md) 与 [UX §5.8](../03-UX-SPEC.md) 取代。下文保留原决定及当时验证，不能用作当前交互合同。
 
 Amended by ADR-044：两入口、触发和会话生命周期不变；完整快照的现金 contract 升级为双券商 schema/prompt v3。
 

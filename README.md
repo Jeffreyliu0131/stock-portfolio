@@ -1,12 +1,14 @@
 # Stock Portfolio + Buffett Framework Advisor
 
-An iPhone-first portfolio PWA that keeps financial math deterministic, supports an evidence-bound Buffett-inspired portfolio coach, and demonstrates an official-source AAPL/MSFT AI research pipeline.
+An iPhone-first portfolio PWA for understanding today’s portfolio change: exact daily contribution and data coverage first, optional AI interpretation next, and evidence-bound AAPL/MSFT issuer research when a deeper question needs it.
 
 The product records and values a portfolio; it does not place orders, recommend trades, promise real-time prices, or impersonate Warren Buffett. The advisor is a method simulation based on public value-investing principles and is not affiliated with Buffett or Berkshire Hathaway.
 
 ## Primary review task
 
 Start with **understanding today's portfolio change**: inspect deterministic contribution, concentration and missing-data coverage in Portfolio analysis. Open consultation only for a follow-up question; issuer research is a separate, secondary workflow. This snapshot does not have a validated weekly performance history.
+
+The [September 7 source milestone](https://github.com/Jeffreyliu0131/stock-portfolio/commit/491c9b579a4bbcb13d45cfc1957c9e84fdec0949) adds on-demand interpretation and visible snapshot boundaries. Publishing this source does not update a separately deployed production app.
 
 ## Why this is an AI product
 
@@ -145,7 +147,7 @@ npm run build:next
 npm run bundle:check
 ```
 
-The current public snapshot passes 618 automated tests. The dedicated [Buffett research eval](evals/buffett-research/results/latest.md) passes 9/9 credential-free synthetic cases. That demonstrates reproducible contract behavior, not live retrieval freshness, citation entailment, investment performance, user adoption, model quality, or financial outcomes.
+The September 7 source milestone passes 619 automated tests; current status is available in the [GitHub verification workflow](https://github.com/Jeffreyliu0131/stock-portfolio/actions/workflows/security.yml). The dedicated [Buffett research eval](evals/buffett-research/results/latest.md) passes 9/9 credential-free synthetic cases. That demonstrates reproducible contract behavior, not live retrieval freshness, citation entailment, investment performance, user adoption, model quality, or financial outcomes.
 
 ## Architecture
 

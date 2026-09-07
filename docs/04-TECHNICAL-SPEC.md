@@ -1,5 +1,8 @@
 # 技术规格
 
+> 2026-09-07 公开仓同步：当前 AI 调用时机与快照行为已按 [FR-14](01-PRD.md) 更新；带日期的生产记录仅描述其历史版本，不代表本次源码发布更新了生产应用。
+
+
 状态：Active  
 最后更新：2026-08-22（统一组合现金修订）
 
@@ -479,7 +482,7 @@ type PortfolioCopyTarget = "clipboard" | "chatgpt";
 - 初始响应必须按请求顺序对每只持仓返回一条 `AI_INFERRED` 分类：`instrumentType`、GICS 对齐 `sector`、`themes`、`confidence` 和 `rationale`。`ui/portfolio-consultation-context.ts` 再把已验证分类映射回当前未舍入 `assetWeight`，使用 Decimal 汇总行业与资产角色暴露；现金不分类，缺价不以成本或零补入。
 - 初始 `brief` 固定包含资产/现金配置、集中度、行业/主题、工具/潜在重叠、表现/贡献和数据边界六个不重复维度，`questions` 固定为空。独立 CHAT `answer` 可回答问题，但只能引用已知基础 evidence，必须返回 framework lenses；模型正文不承载数字，组件根据引用使用会话开始时 USD/CNY 真值生成证据标签。
 - `application/ai/value-investing-framework.ts` 维护顾问名称、非冒充披露、九个 lens enum/中文标签和系统政策。框架强制区分快照事实、框架推断、用户假设和未知；没有一手基本面时不得生成护城河、管理层、所有者收益或内在价值结论。
-- `components/portfolio-ai-consultation-panel.tsx` 只拥有一次组合体检 state，挂载即使用打开时 props 请求，渲染分类、暴露和六维 brief；后台 props 刷新不替换该结果，失败只保留紧凑重试。`components/portfolio-ai-chat-dialog.tsx` 打开时不创建请求，空态披露方法与运行时数据边界；首次发送创建并保存固定请求快照，后续最多提交最近十二条消息，UI 最多保留二十四条。两个组件卸载或页面刷新后 state 清除，不写 IndexedDB、`localStorage`、导出或缓存。
+- `components/portfolio-ai-consultation-panel.tsx` 维护 idle/loading/error/ready 状态；挂载 idle 且不请求，显式开始/重新解读才使用当时最新 props 构造快照。成功后渲染分类、暴露和六维 brief；后台 props 刷新不替换该结果，指纹差异提示数据变化，失败提供紧凑重试。`components/portfolio-ai-chat-dialog.tsx` 打开时不创建请求，空态披露方法与运行时数据边界；首次发送创建并保存固定请求快照，后续最多提交最近十二条消息，UI 最多保留二十四条。两个组件卸载或页面刷新后 state 清除，不写 IndexedDB、`localStorage`、导出或缓存。
 - `application/ai/server/deepseek-portfolio-consultant.ts` 每次使用固定 system 说明、稳定快照前缀、固定确认消息和当前有限历史构建 messages。provider 固定调用官方 `https://api.deepseek.com/beta/chat/completions`，强制选择 `strict: true` 的 `return_portfolio_consultation` 函数并禁止重定向；INITIAL_ANALYSIS 的 schema 按请求动态列出每个 `positionId` 和六个维度，模型不能返回或改写 positionId/symbol/basis，服务端只把受限分类字段按原请求顺序重新附着。CHAT 只允许回答与基础 evidence，FOLLOW_UP 的既有分类由服务端原样附着。合法但过多的 evidence 在确认全量属于当前白名单且无重复后截为最多五项，未知或跨类引用仍整份拒绝。
 - INITIAL_ANALYSIS 使用七千 token 上限与二十五秒总超时，CHAT 使用一千八百 token 上限与十八秒总超时，首次温度均为零。首个候选未通过本机 contract 时，不把原始候选重新注入上下文，只能在同一个 abort window 内使用模式专属修复指令完整重做一次。严格函数 schema 不能替代本机长度、文字、证据语义和安全校验。
 - Vercel `/api/ai/portfolio-analysis` 当前代码只接受 schema v4；请求上限为 262,144 bytes，每实例每调用方每分钟十二次尽力限流，所有响应 `no-store`。Sites 页面要求登录，但 AI 费用仍必须使用 DeepSeek 受控余额作为硬上限。本地实现不等于已发布；生产仍需 schema v4 合成 smoke 和真机验收。
