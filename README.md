@@ -1,8 +1,12 @@
-# Stock Portfolio + Buffett Framework Advisor
+# Stock Portfolio
 
 An iPhone-first portfolio PWA for understanding today’s portfolio change: exact daily contribution and data coverage first, optional AI interpretation next, and evidence-bound AAPL/MSFT issuer research when a deeper question needs it.
 
 The product records and values a portfolio; it does not place orders, recommend trades, promise real-time prices, or impersonate Warren Buffett. The advisor is a method simulation based on public value-investing principles and is not affiliated with Buffett or Berkshire Hathaway.
+
+[**Run locally**](#run-locally) · [Product requirements](docs/01-PRD.md) · [AI design](docs/AI-SYSTEM.md) · [Verification](#verification)
+
+**Key choice:** exact calculations own the numbers; AI explains the current snapshot only when requested. Missing quotes stay visible rather than becoming guessed returns.
 
 ## Primary review task
 
